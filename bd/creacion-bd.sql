@@ -1,9 +1,7 @@
 -- Habilitar la extensión PostGIS
 CREATE EXTENSION IF NOT EXISTS postgis;
 
--- ======================================
 -- 1. TABLA DE USUARIOS
--- ======================================
 CREATE TABLE usuario (
     id SERIAL PRIMARY KEY,
     username VARCHAR(100) UNIQUE NOT NULL,
@@ -12,9 +10,7 @@ CREATE TABLE usuario (
     creado_en TIMESTAMP DEFAULT NOW()
 );
 
--- ======================================
 -- 2. TABLA DE SECTORES
--- ======================================
 CREATE TABLE sector (
     id SERIAL PRIMARY KEY,
     nombre VARCHAR(100) UNIQUE NOT NULL,
@@ -22,9 +18,8 @@ CREATE TABLE sector (
     ubicacion GEOGRAPHY(POINT, 4326) NOT NULL -- punto representativo del sector
 );
 
--- ======================================
 -- 3. TABLA DE TAREAS
--- ======================================
+
 CREATE TABLE tarea (
     id SERIAL PRIMARY KEY,
     titulo VARCHAR(150) NOT NULL,
@@ -37,17 +32,13 @@ CREATE TABLE tarea (
     creada_en TIMESTAMP DEFAULT NOW()
 );
 
--- ======================================
--- 4. INDICES ESPACIALES (para acelerar consultas PostGIS)
--- ======================================
+
+-- 4. INDICES ESPACIALES
 CREATE INDEX idx_usuario_ubicacion ON usuario USING GIST (ubicacion);
 CREATE INDEX idx_sector_ubicacion ON sector USING GIST (ubicacion);
 CREATE INDEX idx_tarea_ubicacion ON tarea USING GIST (ubicacion);
 
--- ======================================
 -- 5. VISTAS ÚTILES PARA CONSULTAS
--- ======================================
-
 -- Tareas completadas por sector y usuario
 CREATE VIEW vista_tareas_por_sector AS
 SELECT 
