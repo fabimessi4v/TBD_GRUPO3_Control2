@@ -1,9 +1,7 @@
 package com.proyectogradle.bakend.entities;
 
 import jakarta.persistence.*;
-
-import java.awt.*;
-import java.time.LocalDateTime;
+import org.locationtech.jts.geom.Point;
 
 @Entity
 @Table(name = "sector")

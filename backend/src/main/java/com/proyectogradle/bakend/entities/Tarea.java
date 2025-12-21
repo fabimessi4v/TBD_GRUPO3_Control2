@@ -1,8 +1,9 @@
 package com.proyectogradle.bakend.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import org.locationtech.jts.geom.Point;
 
-import java.awt.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
@@ -35,6 +36,7 @@ public class Tarea {
     private Sector sector;
 
     @Column(columnDefinition = "geography(Point, 4326)", nullable = false)
+    @JsonIgnore
     private Point ubicacion;
 
     @Column(name = "creada_en", updatable = false, insertable = false,
@@ -67,6 +69,17 @@ public class Tarea {
 
     public Point getUbicacion() { return ubicacion; }
     public void setUbicacion(Point ubicacion) { this.ubicacion = ubicacion; }
+    // Expone la Latitud para el Frontend
+    public Double getLatitud() {
+        if (this.ubicacion == null) return null;
+        return this.ubicacion.getY(); // En PostGIS Point, Y es la latitud
+    }
+
+    // Expone la Longitud para el Frontend
+    public Double getLongitud() {
+        if (this.ubicacion == null) return null;
+        return this.ubicacion.getX(); // En PostGIS Point, X es la longitud
+    }
 
     public LocalDateTime getCreadaEn() { return creadaEn; }
     public void setCreadaEn(LocalDateTime creadaEn) { this.creadaEn = creadaEn; }

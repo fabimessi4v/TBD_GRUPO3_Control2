@@ -7,4 +7,10 @@ const apiClient = axios.create({
   }
 })
 
+// Si existe token guardado (login), lo usamos en cada request
+const token = localStorage.getItem('token')
+if (token) {
+  apiClient.defaults.headers.common['Authorization'] = `Bearer ${token}`
+}
+
 export default apiClient
