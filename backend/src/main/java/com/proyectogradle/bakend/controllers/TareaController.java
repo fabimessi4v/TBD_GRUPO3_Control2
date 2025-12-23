@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/api/tareas")
+@RequestMapping("/api/tarea")
 @CrossOrigin(origins = "http://localhost:3000", allowCredentials = "true")
 public class TareaController {
 
@@ -181,14 +181,5 @@ public class TareaController {
         // Retornamos 200 OK con la lista de tareas (estará vacía si el usuario no tiene)
         return ResponseEntity.ok(tareas);
     }
-
-
-
-
-
-
-
-
-
 
 }

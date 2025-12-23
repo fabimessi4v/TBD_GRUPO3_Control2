@@ -1,5 +1,7 @@
 package com.proyectogradle.bakend.repository;
 
+import com.proyectogradle.bakend.DTO.TareaSimpleDTO;
+import com.proyectogradle.bakend.DTO.TareasPendientesSectorDTO;
 import com.proyectogradle.bakend.entities.Sector;
 import com.proyectogradle.bakend.entities.Tarea;
 import com.proyectogradle.bakend.entities.Usuario;
