@@ -27,7 +27,6 @@ public class PromedioUbicacionRegistroController {
 
     /**
      * Obtiene lel promedio de la ubicación de las tareas con la ubicación de registro del usuario.
-     * El usuario se obtiene desde el TOKEN JWT (Authentication)
      * GET /api/promedioubicacion
      */
     @GetMapping("/tarea/registro")

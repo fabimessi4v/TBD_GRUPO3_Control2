@@ -29,7 +29,6 @@ public class NumeroTareasPorUsuarioController {
 
     /**
      * Obtiene la cantidad de tareas del usuario autenticado por sector.
-     * El usuario se obtiene desde el TOKEN JWT (Authentication),
      * GET /api/numerotareas/cantidadtareas
      */
     @GetMapping("/cantidadtareas")

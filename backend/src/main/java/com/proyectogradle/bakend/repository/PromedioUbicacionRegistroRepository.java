@@ -2,7 +2,9 @@ package com.proyectogradle.bakend.repository;
 
 import com.proyectogradle.bakend.DTO.PromedioUbicacionRegistroDTO;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Repository;
 
+@Repository
 public class PromedioUbicacionRegistroRepository {
     private final JdbcTemplate jdbcTemplate;
 

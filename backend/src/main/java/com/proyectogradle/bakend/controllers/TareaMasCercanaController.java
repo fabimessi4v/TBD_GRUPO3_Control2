@@ -27,7 +27,6 @@ public class TareaMasCercanaController {
 
     /**
      * Obtiene la tarea pendiente más cercana a la ubicación del usuario.
-     * El usuario se obtiene desde el TOKEN JWT (Authentication)
      * GET /api/tarea/mascercana
      */
     @GetMapping("/mascercana")
