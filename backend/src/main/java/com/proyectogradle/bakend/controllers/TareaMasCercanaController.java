@@ -4,7 +4,6 @@ import com.proyectogradle.bakend.DTO.TareaMasCercanaDTO;
 import com.proyectogradle.bakend.entities.Usuario;
 import com.proyectogradle.bakend.repository.TareaMasCercanaRepository;
 import com.proyectogradle.bakend.repository.UserRepository;
-import org.locationtech.jts.geom.Point;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
