@@ -27,7 +27,7 @@ public class PromedioUbicacionRegistroController {
 
     /**
      * Obtiene lel promedio de la ubicación de las tareas con la ubicación de registro del usuario.
-     * GET /api/promedioubicacion
+     * GET /api/promedioubicacion/tarea/registro
      */
     @GetMapping("/tarea/registro")
     public ResponseEntity<PromedioUbicacionRegistroDTO> obtenerPromedioUbicacionRegistro(
