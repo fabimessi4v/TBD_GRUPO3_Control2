@@ -10,8 +10,10 @@ import org.locationtech.jts.geom.Point;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.time.LocalDate;
 import java.util.Optional;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+
 /**
  * Repositorio para la entidad Usuario.
  *
@@ -123,4 +125,75 @@ public class UserRepository {
             return false;
         }
     }
+
+    /**
+     * Inserta o actualiza la posición en tiempo real del usuario autenticado (sesión actual).
+     *
+     * - Obtiene el username desde el SecurityContext (JWT/Spring Security).
+     * - En este proyecto, `usuario.password_hash` es NOT NULL, por lo que NO podemos crear un
+     *   "usuario mínimo" sólo con username.
+     * - Por eso este método asume que el usuario ya existe (registrado) y sólo actualiza
+     *   `posicion_tiempo_real`.
+     *
+     * @param posicion Punto (longitud=X, latitud=Y) con SRID 4326.
+     */
+    public void upsertPosicionTiempoRealUsuarioActual(Point posicion) {
+        String username = getCurrentUsername();
+
+        int updated = updatePosicionTiempoReal(username, posicion);
+        if (updated == 0) {
+            throw new IllegalStateException("No existe el usuario '" + username + "' en la tabla usuario. Primero debes registrarlo.");
+        }
+    }
+
+    /**
+     * Actualiza la posición en tiempo real de un usuario existente.
+     *
+     * @param username nombre de usuario.
+     * @param posicion Punto (longitud=X, latitud=Y) con SRID 4326.
+     * @return cantidad de filas actualizadas.
+     */
+    public int updatePosicionTiempoReal(String username, Point posicion) {
+        String sql =
+                "UPDATE usuario SET posicion_tiempo_real = " +
+                "ST_SetSRID(ST_MakePoint(?, ?), 4326)::geography " +
+                "WHERE username = ?";
+
+        return jdbcTemplate.update(
+                sql,
+                posicion.getX(), // Longitud
+                posicion.getY(),  // Latitud
+                username
+        );
+    }
+
+    /**
+     * Inserta o actualiza la posición en tiempo real del usuario.
+     *
+     * Esta sobrecarga acepta username explícito (útil para administración o tests).
+     *
+     * IMPORTANTE: por compatibilidad, este método ahora hace UPDATE sobre usuario existente.
+     *
+     * @param username nombre de usuario.
+     * @param posicion Punto (longitud=X, latitud=Y) con SRID 4326.
+     */
+    public void upsertPosicionTiempoReal(String username, Point posicion) {
+        int updated = updatePosicionTiempoReal(username, posicion);
+        if (updated == 0) {
+            throw new IllegalStateException("No existe el usuario '" + username + "' en la tabla usuario. Primero debes registrarlo.");
+        }
+    }
+
+    /**
+     * Extrae el username del contexto de seguridad (sesión actual).
+     */
+    private String getCurrentUsername() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !auth.isAuthenticated() || auth.getName() == null || auth.getName().isBlank()) {
+            throw new IllegalStateException("No hay un usuario autenticado en el contexto de seguridad.");
+        }
+        return auth.getName();
+    }
+
 }
+

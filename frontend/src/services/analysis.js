@@ -17,4 +17,36 @@ export default {
     return apiClient.get('/tarea/mascercana')
   },
   // getPromedioDistancia() { ... }
+
+/**
+ * Obtiene los sectores ordenados por cantidad de tareas completadas dentro de un radio de 2km
+ * desde la ubicación del usuario autenticado.
+ * Endpoint: GET /api/sectores/tareas-completadas/radio-2km
+ */
+
+
+getSectoresTareasCompletadasRadio2km() {
+    return apiClient.get('/sectores/tareas-completadas/radio-2km')
+  },
+
+/**
+ * Obtiene el promedio de distancia (en metros) entre la ubicación del usuario autenticado
+ * y la ubicación de sus tareas completadas.
+ * Endpoint: GET /api/promedios/distancia-tareas-completadas
+ */
+
+
+  getPromedioDistanciaTareasCompletadas() {
+    return apiClient.get('/promedios/distancia-tareas-completadas')
+  },
+
+/**
+ * Actualiza la posición en tiempo real del usuario autenticado.
+ *
+  * Endpoint: PUT /api/usuario/posicion-tiempo-real
+ */
+ UpdatePosicionUsuarioTiempoReal(posicion) {
+  return apiClient.put('/usuario/posicion-tiempo-real', posicion)
+}
+
 }
