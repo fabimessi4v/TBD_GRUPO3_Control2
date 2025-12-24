@@ -4,7 +4,6 @@ import com.proyectogradle.bakend.DTO.SectorCantidadDTO;
 import com.proyectogradle.bakend.entities.Usuario;
 import com.proyectogradle.bakend.repository.NumeroTareasPorUsuarioRepository;
 import com.proyectogradle.bakend.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -19,7 +18,6 @@ public class NumeroTareasPorUsuarioController {
     private final NumeroTareasPorUsuarioRepository numeroTareasPorUsuarioRepository;
     private final UserRepository userRepository;
 
-    @Autowired
     public NumeroTareasPorUsuarioController(
             NumeroTareasPorUsuarioRepository numeroTareasPorUsuarioRepository,
             UserRepository userRepository
@@ -31,9 +29,7 @@ public class NumeroTareasPorUsuarioController {
 
     /**
      * Obtiene la cantidad de tareas del usuario autenticado por sector.
-     *
      * El usuario se obtiene desde el TOKEN JWT (Authentication),
-     *
      * GET /api/numerotareas/cantidadtareas
      */
     @GetMapping("/cantidadtareas")
@@ -47,7 +43,7 @@ public class NumeroTareasPorUsuarioController {
                         "Usuario no encontrado en la base de datos"
                 ));
 
-        // Ejecutar consulta segura usando el ID
+        // Ejecutar consulta usando el ID
         List<SectorCantidadDTO> resultado =
                 numeroTareasPorUsuarioRepository.obtenerListaTareas(usuario.getId());
 

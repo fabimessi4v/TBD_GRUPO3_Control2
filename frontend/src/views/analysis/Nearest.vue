@@ -147,6 +147,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
+import analysis from '@/services/analysis'
 
 // ESTADOS
 const selectedRadius = ref('2')
@@ -160,14 +161,16 @@ const analysisData = ref({
   clusters: []                           // Pregunta: Concentración de tareas pendientes
 })
 
-// MÉTODOS PARA LLAMAR A SPRING
+/*// 
+//Inicial
+MÉTODOS PARA LLAMAR A SPRING
 const loadAnalysis = async () => {
   try {
     // Ejemplo de llamadas al backend (ajusta las URLs a tus endpoints de Spring)
     // const res = await axios.get('/api/analysis/summary')
     // analysisData.value = res.data
     
-    // MOCK DATA (Para que veas cómo se llena)
+    // MOCK DATA
     analysisData.value.nearestTask = { title: 'Reparación Semáforo Alameda', distance: 150 }
     analysisData.value.avgDistance = 3.4
     analysisData.value.clusters = [
@@ -186,12 +189,56 @@ const loadAnalysis = async () => {
   } catch (error) {
     console.error("Error cargando análisis:", error)
   }
+}*/
+
+// MÉTODOS PARA LLAMAR A SPRING
+const loadAnalysis = async () => {
+  try {
+    const res = await analysis.getTareaMasCercana()
+
+    if (res && res.data) {
+      analysisData.value.nearestTask = {
+        title: res.data.titulo,
+        distance: Math.round(Number(res.data.distancia))
+      }
+    } else {
+      analysisData.value.nearestTask = { title: 'N/A', distance: 0 }
+    }
+
+  } catch (error) {
+    console.error("Error cargando tarea más cercana:", error)
+    analysisData.value.nearestTask = { title: 'N/A', distance: 0 }
+  }
+  // Datos mock
+  analysisData.value.avgDistance = 3.4
+
+  try {
+    const res = await analysis.getCantidadTareasPorSector()
+
+    if (Array.isArray(res.data)) {
+      analysisData.value.clusters = res.data.map((s, index) => ({
+        sectorName: s.sector || `Sector ${index + 1}`,
+        pendingCount: s.cantidadTareas || 0,
+        tasks: [
+          {
+            id: index + 1,
+            title: `Tareas pendientes en ${s.sector || 'este sector'}`
+          }
+        ]
+      }))
+    } else {
+      analysisData.value.clusters = []
+    }
+
+    loadRadiusStats()
+  } catch (error) {
+    console.error("Error cargando análisis desde el servidor:", error)
+    analysisData.value.clusters = []
+  }
 }
 
 const loadRadiusStats = async () => {
   console.log("Cargando datos para radio de:", selectedRadius.value, "km")
-  // Aquí llamarías a: `/api/analysis/sector-by-radius?radius=${selectedRadius.value}`
-  
   // MOCK DATA para el radio
   if(selectedRadius.value === '2') {
     analysisData.value.sectorsByRadius = [

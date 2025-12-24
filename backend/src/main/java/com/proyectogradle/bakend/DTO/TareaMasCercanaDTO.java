@@ -1,17 +1,17 @@
 package com.proyectogradle.bakend.DTO;
 
 public class TareaMasCercanaDTO {
-    private Integer id;
+    private Long id;
     private String titulo;
     private Double distancia;
 
-    public TareaMasCercanaDTO(Integer id, String titulo, Double distancia) {
+    public TareaMasCercanaDTO(Long id, String titulo, Double distancia) {
         this.id = id;
         this.titulo = titulo;
         this.distancia = distancia;
     }
 
-    public Integer getId() {
+    public Long getId() {
         return id;
     }
 
