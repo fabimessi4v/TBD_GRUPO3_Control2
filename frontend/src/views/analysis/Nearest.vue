@@ -183,7 +183,6 @@
                 +{{ topCompletedSector2km.completedCount ?? 0 }}
               </v-chip>
             </div>
-
             <div v-else class="text-body-2 text-medium-emphasis">
               Sin datos para mostrar.
             </div>
@@ -191,41 +190,32 @@
         </v-card>
       </v-col>
       <v-col cols="12" md="5">
-  <v-card border flat>
-    <v-card-item title="Zonas de Concentración">
-      <template v-slot:subtitle>
-        Sectores con más tareas pendientes (Clustering)
-      </template>
-    </v-card-item>
-    
-    <v-expansion-panels variant="accordion" class="pa-2">
-      <v-expansion-panel
-        v-for="cluster in analysisData.clusters"
-        :key="cluster.sectorName"
-        elevation="0"
-        class="border-thin"
-      >
-        <v-expansion-panel-title>
-          <v-badge :content="cluster.pendingCount" color="error" inline>
-            <span class="font-weight-medium">{{ cluster.sectorName }}</span>
-          </v-badge>
-        </v-expansion-panel-title>
+        <v-card border flat>
+          <v-card-item title="Zonas de Concentración">
+            <template v-slot:subtitle>
+              Sectores con más tareas pendientes (Clustering)
+            </template>
+          </v-card-item>
 
-        <v-expansion-panel-text>
-          <v-list density="compact">
-            <v-list-item
-              v-for="task in cluster.tasks"
-              :key="task.id"
-              :title="task.title"
-              prepend-icon="mdi-alert-circle-outline"
-            />
-          </v-list>
-        </v-expansion-panel-text>
-      </v-expansion-panel>
-    </v-expansion-panels>
-  </v-card>
-</v-col>
+          <v-expansion-panels variant="accordion" class="pa-2">
+            <v-expansion-panel v-for="cluster in analysisData.clusters" :key="cluster.sectorName" elevation="0"
+              class="border-thin">
+              <v-expansion-panel-title>
+                <v-badge :content="cluster.pendingCount" color="success" inline>
+                  <span class="font-weight-medium">{{ cluster.sectorName }}</span>
+                </v-badge>
+              </v-expansion-panel-title>
 
+              <v-expansion-panel-text>
+                <v-list density="compact">
+                  <v-list-item v-for="task in cluster.tasks" :key="task.id" :title="task.title"
+                    prepend-icon="mdi-alert-circle-outline" />
+                </v-list>
+              </v-expansion-panel-text>
+            </v-expansion-panel>
+          </v-expansion-panels>
+        </v-card>
+      </v-col>
     </v-row>
   </v-container>
 </template>
