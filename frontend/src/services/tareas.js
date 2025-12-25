@@ -1,5 +1,9 @@
 import apiClient from '@/services/axios'
 export default {
+  // Obtener notificaciones
+  getNotificaciones() {
+    return apiClient.get('/notificaciones/fechavencimiento')
+  },
   // Obtener todas las tareas
   getTasks() {
     return apiClient.get('/tareas')

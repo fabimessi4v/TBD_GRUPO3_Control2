@@ -1,5 +1,5 @@
 <template>
-  <v-container fluid class="bg-grey-lighten-4 fill-height align-start">
+  <v-container fluid class="bg-grey-lighten-4 align-start">
     <v-row>
       <v-col cols="12">
         <div class="d-flex align-center mb-4">
@@ -190,6 +190,42 @@
           </v-card-text>
         </v-card>
       </v-col>
+      <v-col cols="12" md="5">
+  <v-card border flat>
+    <v-card-item title="Zonas de Concentración">
+      <template v-slot:subtitle>
+        Sectores con más tareas pendientes (Clustering)
+      </template>
+    </v-card-item>
+    
+    <v-expansion-panels variant="accordion" class="pa-2">
+      <v-expansion-panel
+        v-for="cluster in analysisData.clusters"
+        :key="cluster.sectorName"
+        elevation="0"
+        class="border-thin"
+      >
+        <v-expansion-panel-title>
+          <v-badge :content="cluster.pendingCount" color="error" inline>
+            <span class="font-weight-medium">{{ cluster.sectorName }}</span>
+          </v-badge>
+        </v-expansion-panel-title>
+
+        <v-expansion-panel-text>
+          <v-list density="compact">
+            <v-list-item
+              v-for="task in cluster.tasks"
+              :key="task.id"
+              :title="task.title"
+              prepend-icon="mdi-alert-circle-outline"
+            />
+          </v-list>
+        </v-expansion-panel-text>
+      </v-expansion-panel>
+    </v-expansion-panels>
+  </v-card>
+</v-col>
+
     </v-row>
   </v-container>
 </template>
@@ -345,7 +381,7 @@ const loadAnalysis = async () => {
         tasks: [
           {
             id: index + 1,
-            title: `Tareas pendientes en ${s.sector || 'este sector'}`
+            title: `Tareas terminadas en ${s.sector || 'este sector'}`
           }
         ]
       }))

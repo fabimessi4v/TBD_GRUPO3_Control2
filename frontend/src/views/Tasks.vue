@@ -1,6 +1,32 @@
 <template>
   <v-container>
     <div class="d-flex align-center mb-6 position-relative">
+
+      <!-- Notificaciones -->
+      <v-menu location="bottom start">
+        <template #activator="{ props }">
+          <v-badge :content="notificaciones.length" :model-value="notificaciones.length > 0" color="error" overlap>
+            <v-btn icon v-bind="props" variant="text">
+              <v-icon>mdi-bell</v-icon>
+            </v-btn>
+          </v-badge>
+        </template>
+
+        <v-card min-width="300">
+          <v-card-title class="text-subtitle-1">Notificaciones</v-card-title>
+          <v-divider />
+          <v-list density="compact">
+            <v-list-item v-for="(n, i) in notificaciones" :key="i">
+              <v-list-item-title>{{ n.titulo }}</v-list-item-title>
+              <v-list-item-subtitle>Vence el {{ n.fechaVencimiento }}</v-list-item-subtitle>
+            </v-list-item>
+
+            <v-list-item v-if="notificaciones.length === 0">
+              <v-list-item-title class="text-medium-emphasis">No hay tareas próximas</v-list-item-title>
+            </v-list-item>
+          </v-list>
+        </v-card>
+      </v-menu>
       <h1 class="text-h4 mx-auto">Mis Tareas</h1>
 
       <!-- AÑADIR TAREAS FORMULARIO-->
@@ -347,6 +373,7 @@ export default {
         { title: 'Ubicación (GPS)', key: 'location', sortable: false },
         { title: 'Acciones', key: 'actions', sortable: false, align: 'end' },
       ],
+      notificaciones: [],
       tasks: [], // Empezamos con el array vacío
 
       // Leaflet (dialog)
@@ -363,7 +390,6 @@ export default {
       if (isOpen) {
         this.dialogErrorMessage = ''
         this.dialogLoading = false
-        // esperar a que se renderice el dialogo
         this.$nextTick(() => this.initMap())
       }
     },
@@ -389,6 +415,7 @@ export default {
   },
   mounted() {
     this.cargarTareas()
+    this.cargarNotificaciones()
   },
   beforeUnmount() {
     if (this.map) {
@@ -403,6 +430,14 @@ export default {
   methods: {
     getRow(item) {
       return item?.raw ?? item
+    },
+    async cargarNotificaciones() {
+      try {
+        const res = await tareas.getNotificaciones()
+        this.notificaciones = res.data || []
+      } catch (e) {
+        this.notificaciones = []
+      }
     },
     resetNewTask() {
       this.newTask = {
@@ -441,7 +476,6 @@ export default {
         this.newTask.longitud = Number(ll.lng.toFixed(6))
       })
 
-      // Fix clásico: el mapa en dialogs necesita invalidar tamaño
       this.$nextTick(() => {
         try {
           this.map.invalidateSize()
@@ -506,8 +540,7 @@ export default {
       try {
         // El backend filtra por el usuario autenticado (JWT) y devuelve solo “mis tareas”.
         const response = await tareas.getTasksUser();
-        
-        // Mapeamos los datos para que el front no explote si latitud es undefined
+    
         this.tasks = (response.data || []).map(t => ({
           // mantener el id para acciones
           id: t.id,
@@ -523,7 +556,6 @@ export default {
           latitud: t.latitud ?? null,
           longitud: t.longitud ?? null,
 
-          // opcional por si luego lo necesitas
           _raw: t,
         }))
       } catch (error) {
@@ -540,7 +572,7 @@ export default {
       if (confirm('¿Estás seguro de eliminar esta tarea?')) {
         try {
           await tareas.deleteTask(id)
-          this.cargarTareas() // Recargamos la lista
+          this.cargarTareas()
         } catch (error) {
           alert("Error al eliminar")
         }
@@ -557,7 +589,6 @@ export default {
       this.dialogErrorMessage = ''
 
       // Payload backend (flexible): algunas implementaciones esperan sectorId,
-      // otras esperan sector: { id }. Enviamos ambas si viene idSector.
       const sectorIdNumber =
         this.newTask.idSector === '' || this.newTask.idSector == null
           ? null
