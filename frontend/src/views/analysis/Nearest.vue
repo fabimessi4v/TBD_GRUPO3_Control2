@@ -193,7 +193,7 @@
         <v-card border flat>
           <v-card-item title="Zonas de Concentración">
             <template v-slot:subtitle>
-              Sectores con más tareas pendientes (Clustering)
+              Sectores con más tareas terminadas (Clustering)
             </template>
           </v-card-item>
 
