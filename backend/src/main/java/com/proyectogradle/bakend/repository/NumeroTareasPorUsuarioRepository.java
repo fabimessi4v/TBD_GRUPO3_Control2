@@ -13,7 +13,7 @@ public class NumeroTareasPorUsuarioRepository {
     private JdbcTemplate jdbcTemplate;
 
     /**
-     * Obtiene la cantidad de tareas que ha realizado el usuario por sector (pendientes).
+     * Obtiene la cantidad de tareas que ha realizado el usuario por sector.
      *
      * @param id ID del usuario.
      * @return Cantidad de tareas.
@@ -27,7 +27,7 @@ public class NumeroTareasPorUsuarioRepository {
                     FROM tarea t
                     JOIN sector s ON t.id_sector = s.id
                     WHERE t.id_usuario = ?
-                      AND t.completada = FALSE
+                      AND t.completada = TRUE
                     GROUP BY s.nombre
                 """;
 
