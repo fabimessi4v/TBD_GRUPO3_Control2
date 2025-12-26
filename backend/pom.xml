@@ -83,19 +83,6 @@
         </dependency>
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
@@ -114,6 +101,10 @@
                 <artifactId>spring-boot-maven-plugin</artifactId>
             </plugin>
         </plugins>
+        <finalName>
+            Gestor_de_tareas
+        </finalName>
     </build>
+
 
 </project>
