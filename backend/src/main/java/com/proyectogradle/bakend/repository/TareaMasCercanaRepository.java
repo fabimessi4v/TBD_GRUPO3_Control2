@@ -23,18 +23,18 @@ public class TareaMasCercanaRepository {
 
         String sql = """
             SELECT
-              t.id,
-              t.titulo,
-              ST_Distance(
-                t.ubicacion,
-                u.ubicacion
-              ) AS distancia
+            t.id, 
+            t.titulo,
+            ST_Distance(
+            t.ubicacion,
+            u.posicion_tiempo_real
+            ) AS distancia
             FROM tarea t
             JOIN usuario u ON u.id = ?
             WHERE t.id_usuario = ?
-              AND t.completada = FALSE
+            AND t.completada = FALSE
             ORDER BY distancia ASC
-            LIMIT 1
+            LIMIT 1;     
         """;
 
         return jdbcTemplate.queryForObject(
