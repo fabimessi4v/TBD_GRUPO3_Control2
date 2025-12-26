@@ -35,10 +35,10 @@ public class WebSecurityConfig {
     @Autowired
     private AuthEntryPointJwt unauthorizedHandler;
 
-    @Bean
-    public AuthTokenFilter authenticationJwtTokenFilter() {
-        return new AuthTokenFilter();
-    }
+    @Autowired
+    private AuthTokenFilter authTokenFilter;
+
+
     // Configura el proveedor de autenticación usando el UserDetailsService y el encoder de contraseñas.
     @Bean
     public DaoAuthenticationProvider authenticationProvider() {
@@ -68,11 +68,11 @@ public class WebSecurityConfig {
                 .authorizeHttpRequests(auth ->
                         auth.requestMatchers("/api/auth/**", "/api/agregaciondedatos/**", "/api/mediciones/**",
                                         "/api/puntos/correlacion","/api/numerotareas/**", "/api/promedios/**" , "/api/usuario/**",
-                                        "/api/tareas/pendientes-por-sector", "/api/tareas/pendientes-por-sector/**", "/api/tarea/mascercana").permitAll()
+                                        "/api/tarea/pendientes-por-sector", "/api/tarea/pendientes-por-sector/**", "/api/tarea/mascercana").permitAll()
                                 .anyRequest().authenticated()
                 )
                 .authenticationProvider(authenticationProvider())
-                .addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(authTokenFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
     // Bean para configurar CORS, permitiendo peticiones desde el frontend (por ejemplo, en localhost:3000).

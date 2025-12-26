@@ -228,52 +228,96 @@
       </v-col>
 
       <!-- 6) Card: Clustering -->
-      <v-col cols="12">
-        <v-card border flat class="rounded-lg">
-          <v-card-item>
-            <template #prepend>
-              <v-icon icon="mdi-chart-scatter-plot" color="primary" size="x-large" />
+      <v-col cols="12" md="5">
+        <v-card border flat>
+          <v-card-item title="Top sector (2km)">
+            <template v-slot:subtitle>
+              Sector con más tareas completadas dentro de 2km
             </template>
-            <v-card-title class="font-weight-bold">Zonas de Concentración</v-card-title>
-            <v-card-subtitle>Sectores con más tareas terminadas (Clustering)</v-card-subtitle>
           </v-card-item>
 
-          <v-divider />
+          <v-card-text class="pt-0">
+            <div v-if="topCompletedSector2km" class="d-flex align-start ga-3">
+              <v-avatar color="green-lighten-4" size="40" class="mt-1">
+                <v-icon icon="mdi-check-decagram" color="green-darken-2" />
+              </v-avatar>
 
-          <v-card-text class="pt-2">
-            <v-expansion-panels variant="accordion" class="pa-0">
-              <v-expansion-panel
-                v-for="cluster in analysisData.clusters"
-                :key="cluster.sectorName"
-                elevation="0"
-                class="border-thin"
-              >
-                <v-expansion-panel-title>
-                  <v-badge :content="cluster.pendingCount" color="success" inline>
-                    <span class="font-weight-medium">{{ cluster.sectorName }}</span>
-                  </v-badge>
-                </v-expansion-panel-title>
+              <div class="flex-1">
+                <div class="text-h6 font-weight-bold">
+                  {{ topCompletedSector2km.sectorName || 'Sector' }}
+                </div>
 
-                <v-expansion-panel-text>
-                  <v-list density="compact">
-                    <v-list-item
-                      v-for="task in cluster.tasks"
-                      :key="task.id"
-                      :title="task.title"
-                      prepend-icon="mdi-alert-circle-outline"
-                    />
-                  </v-list>
-                </v-expansion-panel-text>
-              </v-expansion-panel>
-
-              <div
-                v-if="!analysisData.clusters || analysisData.clusters.length === 0"
-                class="text-body-2 text-medium-emphasis pa-3"
-              >
-                Sin clusters para mostrar.
+                <div class="text-body-2 text-medium-emphasis">
+                  {{ topCompletedSector2km.completedCount ?? 0 }} tareas completadas
+                </div>
               </div>
-            </v-expansion-panels>
+
+              <v-chip color="success" variant="tonal" size="small">
+                +{{ topCompletedSector2km.completedCount ?? 0 }}
+              </v-chip>
+            </div>
+            <div v-else class="text-body-2 text-medium-emphasis">
+              Sin datos para mostrar.
+            </div>
           </v-card-text>
+        </v-card>
+      </v-col>
+      <v-col cols="12" md="5">
+        <v-card border flat>
+          <v-card-item title="Zonas de Concentración">
+            <template #subtitle>
+              Sectores con más tareas pendientes 
+            </template>
+          </v-card-item>
+
+          <v-expansion-panels variant="accordion" class="pa-2">
+            <v-expansion-panel
+              v-for="sector in zonasConcentracion"
+              :key="sector.idSector"
+              elevation="0"
+              class="border-thin"
+            >
+              <v-expansion-panel-title @click.stop="loadDetalleSector(sector)">
+                <div class="d-flex align-center ga-3">
+                  <span class="font-weight-medium">
+                    {{ sector.sectorName }}
+                  </span>
+
+                  <v-badge
+                    :content="sector.pendingCount"
+                    color="success"
+                    inline
+                    class="ms-2"
+                  />
+                </div>
+              </v-expansion-panel-title>
+
+              <v-expansion-panel-text :key="sector.loaded + '-' + sector.tasks.length">
+                <v-progress-circular
+                  v-if="loadingSectorId === sector.idSector && !sector.loaded"
+                  indeterminate
+                  size="24"
+                />
+
+                <div
+                  v-else-if="sector.loaded && sector.tasks.length === 0"
+                  class="text-body-2 text-medium-emphasis"
+                >
+                  No hay tareas pendientes en este sector.
+                </div>
+
+                <v-list v-else density="compact">
+                  <v-list-item
+                    v-for="task in sector.tasks.slice(0, 5)"
+                    :key="task.id"
+                    :title="task.title"
+                    prepend-icon="mdi-alert-circle-outline"
+                  />
+                </v-list>
+
+              </v-expansion-panel-text>
+            </v-expansion-panel>
+          </v-expansion-panels>
         </v-card>
       </v-col>
 
@@ -577,6 +621,59 @@ const saveLocation = async () => {
     savingLocation.value = false
   }
 }
+
+const zonasConcentracion = ref([])        
+const loadingSectorId = ref(null)        
+
+const loadZonasConcentracion = async () => {
+  try {
+    const res = await analysis.getTareasPendientesSector()
+
+    zonasConcentracion.value = Array.isArray(res.data)
+    ? res.data.map(s => ({
+        idSector: s.id,
+        sectorName: s.nombre,
+        pendingCount: s.pendientes,
+        tasks: [],          
+        loaded: false
+      }))
+    : []
+
+
+  } catch (err) {
+    console.error("Error cargando zonas de concentración:", err)
+    zonasConcentracion.value = []
+  }
+}
+
+const loadDetalleSector = async (sector) => {
+  if (sector.loaded || loadingSectorId.value === sector.idSector) return
+
+  loadingSectorId.value = sector.idSector
+  try {
+    const res = await analysis.getTareasPendientesSectorDetallado(sector.idSector)
+
+    const tasks = Array.isArray(res.data)
+      ? res.data.map(t => ({ id: t.id, title: t.titulo }))
+      : []
+
+    sector.tasks = tasks
+    sector.loaded = true
+    zonasConcentracion.value = [...zonasConcentracion.value] 
+  } catch (err) {
+    console.error("Error cargando detalle sector:", err)
+    sector.tasks = []
+    sector.loaded = true
+    zonasConcentracion.value = [...zonasConcentracion.value] 
+  } finally {
+    loadingSectorId.value = null
+  }
+}
+
+onMounted(() => {
+  loadAnalysis()
+  loadZonasConcentracion()
+})
 
 </script>
 

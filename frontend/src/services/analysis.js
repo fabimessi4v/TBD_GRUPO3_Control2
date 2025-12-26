@@ -16,7 +16,7 @@ export default {
   getTareaMasCercana() {
     return apiClient.get('/tarea/mascercana')
   },
-  // getPromedioDistancia() { ... }
+  
 
 /**
  * Obtiene los sectores ordenados por cantidad de tareas completadas dentro de un radio de 2km
@@ -47,6 +47,20 @@ getSectoresTareasCompletadasRadio2km() {
  */
  UpdatePosicionUsuarioTiempoReal(posicion) {
   return apiClient.put('/usuario/posicion-tiempo-real', posicion)
-}
+},
+/**
+ * lista las tareas pendientes agrupadas por sector
+ * Endpoint: GET /api/tarea/pendientes-por-sector
+ */
+ getTareasPendientesSector(){
+  return apiClient.get('/tarea/pendientes-por-sector')
+ },
+/**
+ * lista las tareas pendientes agrupadas por sector
+ * Endpoint: GET /api/tarea/pendientes-por-sector
+ */
+ getTareasPendientesSectorDetallado(idSector){
+  return apiClient.get(`/tarea/pendientes-por-sector/${idSector}`);
+ },
 
 }
