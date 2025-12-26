@@ -1,6 +1,7 @@
 // src/services/analysis.js
 import apiClient from '@/services/axios'
 
+
 export default {
   /**
    * Obtiene la cantidad de tareas por sector del usuario autenticado
@@ -62,5 +63,12 @@ getSectoresTareasCompletadasRadio2km() {
  getTareasPendientesSectorDetallado(idSector){
   return apiClient.get(`/tarea/pendientes-por-sector/${idSector}`);
  },
+ 
+    // Obtiene el promedio de distancia (en metros) entre la ubicación del usuario autenticado
+    // y la ubicación de sus tareas completadas.
+    // Endpoint: GET /api/promediosubicacion/tareas/registro
+    getPromedioUbicacionTareasRegistro() {
+      return apiClient.get('/promedioubicacion/tarea/registro')
+    },
 
 }

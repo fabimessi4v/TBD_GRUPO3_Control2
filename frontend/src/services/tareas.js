@@ -42,6 +42,8 @@ export default {
   //Obtener tareas sector con mas tareas finalizadas por todos los usuarios
   getTopSectorByCompletedTasks() {
     return apiClient.get('tareas/reportes/sector-top-5km');
-  }
+  },
+
+
 
 }

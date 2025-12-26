@@ -26,7 +26,17 @@ public class Usuario {
                 columnDefinition = "TIMESTAMP DEFAULT NOW()")
         private LocalDateTime creadoEn;
 
-        // Getters y Setters
+        @Column(name = "posicion_tiempo_real")
+        private Point posicion_tiempo_real;
+
+        public Point getPosicion_tiempo_real() {
+                return posicion_tiempo_real;
+        }
+
+        public void setPosicion_tiempo_real(Point posicion_tiempo_real) {
+                this.posicion_tiempo_real = posicion_tiempo_real;
+        }
+// Getters y Setters
 
         public Integer getId() {
                 return id;

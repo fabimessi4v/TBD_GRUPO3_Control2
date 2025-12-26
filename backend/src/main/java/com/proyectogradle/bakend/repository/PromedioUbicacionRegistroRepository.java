@@ -25,7 +25,7 @@ public class PromedioUbicacionRegistroRepository {
                     AVG(
                         ST_Distance(
                             t.ubicacion,
-                            u.ubicacion
+                            u.posicion_tiempo_real
                         )
                     ) AS promedio_distancia_metros
                 FROM tarea t

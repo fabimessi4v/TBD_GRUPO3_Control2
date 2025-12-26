@@ -22,30 +22,31 @@ public class TareaMasCercanaRepository {
     public TareaMasCercanaDTO obtenerTareaMasCercana(Integer idUsuario) {
 
         String sql = """
-            SELECT
-            t.id, 
-            t.titulo,
-            ST_Distance(
-            t.ubicacion,
-            u.posicion_tiempo_real
-            ) AS distancia
-            FROM tarea t
-            JOIN usuario u ON u.id = ?
-            WHERE t.id_usuario = ?
-            AND t.completada = FALSE
-            ORDER BY distancia ASC
-            LIMIT 1;     
-        """;
+        SELECT
+          t.id,
+          t.titulo,
+          ST_Distance(t.ubicacion, u.posicion_tiempo_real) AS distancia_metros
+        FROM tarea t
+        JOIN usuario u ON u.id = ?
+        WHERE t.id_usuario = ?
+          AND t.completada = FALSE
+          AND t.ubicacion IS NOT NULL
+          AND u.posicion_tiempo_real IS NOT NULL
+        ORDER BY distancia_metros ASC
+        LIMIT 1;
+    """;
 
-        return jdbcTemplate.queryForObject(
+        return jdbcTemplate.query(
                 sql,
                 new Object[]{ idUsuario, idUsuario },
                 (rs, rowNum) -> new TareaMasCercanaDTO(
                         rs.getLong("id"),
                         rs.getString("titulo"),
-                        rs.getDouble("distancia")
+                        rs.getDouble("distancia_metros")
                 )
-        );
+        ).stream().findFirst().orElse(null);
     }
+
 }
+
 

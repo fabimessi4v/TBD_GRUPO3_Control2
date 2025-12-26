@@ -49,13 +49,8 @@ export default {
       this.errorMessage = ''
       try {
         const res = await reportes.getCompletedTasksBySector()
-        console.log('STATUS',res.status);
-        console.log('DATA',res.data);
         this.rows = Array.isArray(res.data) ? res.data : (res.data?.data ?? [])
-        console.log('ROWS',this.rows);
         this.rows = res.data || []
-        console.log('content-type', res.headers['content-type'])
-        console.log('typeof data', typeof res.data, res.data)
       } catch (error) {
         console.error(error)
         this.errorMessage =

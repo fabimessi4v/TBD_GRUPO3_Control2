@@ -274,7 +274,7 @@ public class TareaRepository {
                         "FROM tarea t " +
                         "JOIN sector s ON s.id = t.id_sector " +
                         "WHERE t.completada = TRUE " +
-                        "  AND ST_DWithin(t.ubicacion, (SELECT u.ubicacion FROM usuario u WHERE u.id = ?), 5000) " +
+                        "  AND ST_DWithin(t.ubicacion, (SELECT u.posicion_tiempo_real FROM usuario u WHERE u.id = ?), 5000) " +
                         "GROUP BY s.id, s.nombre " +
                         "ORDER BY tareas_completadas_5km DESC " +
                         "LIMIT 1";

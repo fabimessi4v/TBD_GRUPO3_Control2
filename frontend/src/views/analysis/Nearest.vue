@@ -45,18 +45,25 @@
             <template #prepend>
               <v-icon icon="mdi-ruler-square" color="secondary" size="x-large" />
             </template>
-            <v-card-title class="font-weight-bold">Promedio de Distancia</v-card-title>
+            <v-card-title class="font-weight-bold">Promedio de distancia de tareas completadas vs ubicacion en tiempo real</v-card-title>
             <v-card-subtitle>Tareas completadas vs Usuario</v-card-subtitle>
           </v-card-item>
 
           <v-divider />
-
           <v-card-text class="text-center py-4">
-            <div class="text-h3 font-weight-black text-secondary">
-              {{ analysisData.avgDistance }}
-              <span class="text-h5">km</span>
-            </div>
-          </v-card-text>
+          <div
+            class="text-h3 font-weight-black"
+            :class="avgRegistroDistanceStats ? 'text-secondary' : 'text-medium-emphasis'"
+            >
+              {{
+              avgRegistroDistanceStats
+               ? formatMeters(avgRegistroDistanceStats.promedioDistanciaMetros)
+                : 'N/A'
+                   }}
+         </div>
+</v-card-text>
+
+
         </v-card>
       </v-col>
 
@@ -159,10 +166,10 @@
               <v-icon icon="mdi-map-clock" color="secondary" size="x-large" />
             </template>
             <v-card-title class="font-weight-bold">
-              Promedio distancia (tareas completadas)
+              Promedio distancia ubicacion inicial vs tareas completadas.
             </v-card-title>
             <v-card-subtitle>
-              Distancia promedio entre tu ubicación y tus tareas completadas
+              Distancia promedio entre tu ubicacion inicialmente registrada y las tareas completadas.
             </v-card-subtitle>
           </v-card-item>
 
@@ -227,41 +234,7 @@
         </v-card>
       </v-col>
 
-      <!-- 6) Card: Clustering -->
-      <v-col cols="12" md="5">
-        <v-card border flat>
-          <v-card-item title="Top sector (2km)">
-            <template v-slot:subtitle>
-              Sector con más tareas completadas dentro de 2km
-            </template>
-          </v-card-item>
-
-          <v-card-text class="pt-0">
-            <div v-if="topCompletedSector2km" class="d-flex align-start ga-3">
-              <v-avatar color="green-lighten-4" size="40" class="mt-1">
-                <v-icon icon="mdi-check-decagram" color="green-darken-2" />
-              </v-avatar>
-
-              <div class="flex-1">
-                <div class="text-h6 font-weight-bold">
-                  {{ topCompletedSector2km.sectorName || 'Sector' }}
-                </div>
-
-                <div class="text-body-2 text-medium-emphasis">
-                  {{ topCompletedSector2km.completedCount ?? 0 }} tareas completadas
-                </div>
-              </div>
-
-              <v-chip color="success" variant="tonal" size="small">
-                +{{ topCompletedSector2km.completedCount ?? 0 }}
-              </v-chip>
-            </div>
-            <div v-else class="text-body-2 text-medium-emphasis">
-              Sin datos para mostrar.
-            </div>
-          </v-card-text>
-        </v-card>
-      </v-col>
+      
       <v-col cols="12" md="5">
         <v-card border flat>
           <v-card-item title="Zonas de Concentración">
@@ -356,6 +329,10 @@ const locationError = ref('')
 let locationMap = null
 let locationMarker = null
 
+// Nuevo: promedio de distancia entre ubicación REGISTRADA y tareas completadas
+const avgRegistroDistanceStats = ref(null)
+
+
 // DATA PARA RESPONDER PREGUNTAS
 const analysisData = ref({
   nearestTask: { title: '', distance: 0 }, // Pregunta: Tarea más cercana
@@ -402,37 +379,69 @@ const loadAnalysis = async () => {
 
 // MÉTODOS PARA LLAMAR A SPRING
 const loadAnalysis = async () => {
+  // 1) Tarea más cercana
   try {
     const res = await analysis.getTareaMasCercana()
+    const data = res?.data ?? null
+    console.log('Tarea más cercana:', data)
+    console.log("STATUS",res.status);
 
-    if (res && res.data) {
-      analysisData.value.nearestTask = {
-        title: res.data.titulo,
-        distance: Math.round(Number(res.data.distancia))
-      }
-    } else {
-      analysisData.value.nearestTask = { title: 'N/A', distance: 0 }
+    const titulo = data?.titulo ?? data?.title ?? null
+    const distanciaNum = Number(data?.distancia)
+
+    analysisData.value.nearestTask = {
+      title: titulo && String(titulo).trim() ? String(titulo) : 'N/A',
+      distance: Number.isFinite(distanciaNum) ? Math.round(distanciaNum) : 0,
     }
-
   } catch (error) {
-    console.error("Error cargando tarea más cercana:", error)
+    console.error('Error cargando tarea más cercana:', error)
     analysisData.value.nearestTask = { title: 'N/A', distance: 0 }
   }
-  // Datos mock
-  analysisData.value.avgDistance = 3.4
 
-  // Promedio distancia tareas completadas
+  // 2) Promedio (Ubicacion real, se actualiza mediante el mapa)
+  try {
+    const res = await analysis.getPromedioUbicacionTareasRegistro()
+    const data = res?.data ?? null
+
+
+    if (data && typeof data === 'object') {
+      const rawVal =
+        data.promedioUbicacionRegistro ??   
+        data.promedioDistanciaMetros ??
+        data.promedio_metros ??
+        data.promedio ??
+        data.distanciaPromedio ??
+        null
+
+
+      const val = rawVal === '' || rawVal === undefined ? null : rawVal
+
+      avgRegistroDistanceStats.value = {
+        username: data.username ?? data.usuario ?? null,
+        promedioDistanciaMetros: val === null ? null : Number(val),
+        _raw: data,
+      }
+    } else {
+      avgRegistroDistanceStats.value = null
+    }
+  } catch (error) {
+    console.error('Error cargando promedio ubicación registrada vs tareas:', error)
+    avgRegistroDistanceStats.value = null
+  }
+
+  // 3) Promedio (ubicacion inicial, registrada al momento de crear usuario)
   try {
     const res = await analysis.getPromedioDistanciaTareasCompletadas()
     const data = res?.data ?? null
 
+
     if (data && typeof data === 'object') {
+      const rawVal = data.promedioDistanciaMetros ?? null
+      const val = rawVal === '' || rawVal === undefined ? null : rawVal
+
       avgDistanceStats.value = {
-        username: data.username ?? null,
-        promedioDistanciaMetros:
-          data.promedioDistanciaMetros !== undefined && data.promedioDistanciaMetros !== null
-            ? Number(data.promedioDistanciaMetros)
-            : null,
+        username: data.username ?? data.usuario ?? null,
+        promedioDistanciaMetros: val === null ? null : Number(val),
         _raw: data,
       }
     } else {
@@ -443,69 +452,50 @@ const loadAnalysis = async () => {
     avgDistanceStats.value = null
   }
 
-  // Sector con más tareas completadas en radio de 2km (tomamos siempre el primero)
+  // 4) Top sector 2km
   try {
     const res = await analysis.getSectoresTareasCompletadasRadio2km()
     const list = Array.isArray(res?.data) ? res.data : []
     const first = list[0] ?? null
 
-    if (first) {
-      // soportar distintos nombres de campos que pueda mandar el backend
-      topCompletedSector2km.value = {
-        sectorName:
-          first.sector ?? first.sectorName ?? first.nombreSector ?? first.nombre ?? null,
-        completedCount:
-          first.totalCompletadas ?? first.completedCount ?? first.completadas ?? first.cantidad ?? first.total ?? 0,
-        _raw: first,
-      }
-    } else {
-      topCompletedSector2km.value = null
-    }
+    topCompletedSector2km.value = first
+      ? {
+          sectorName: first.sector ?? first.sectorName ?? first.nombreSector ?? first.nombre ?? null,
+          completedCount:
+            first.totalCompletadas ??
+            first.completedCount ??
+            first.completadas ??
+            first.cantidad ??
+            first.total ??
+            0,
+          _raw: first,
+        }
+      : null
   } catch (error) {
     console.error('Error cargando sectores completados (2km):', error)
     topCompletedSector2km.value = null
   }
 
+  // 5) Clusters (tu lógica actual)
   try {
     const res = await analysis.getCantidadTareasPorSector()
-
     if (Array.isArray(res.data)) {
       analysisData.value.clusters = res.data.map((s, index) => ({
         sectorName: s.sector || `Sector ${index + 1}`,
         pendingCount: s.cantidadTareas || 0,
-        tasks: [
-          {
-            id: index + 1,
-            title: `Tareas terminadas en ${s.sector || 'este sector'}`
-          }
-        ]
+        tasks: [{ id: index + 1, title: `Tareas terminadas en ${s.sector || 'este sector'}` }],
       }))
     } else {
       analysisData.value.clusters = []
     }
   } catch (error) {
-    console.error("Error cargando análisis desde el servidor:", error)
+    console.error('Error cargando análisis desde el servidor:', error)
     analysisData.value.clusters = []
   }
 }
 
-onMounted(() => {
-  // cargar último valor si existe
-  try {
-    const saved = localStorage.getItem('userCoords')
-    if (saved) {
-      const parsed = JSON.parse(saved)
-      const lat = Number(parsed?.lat)
-      const lng = Number(parsed?.lng)
-      if (!Number.isNaN(lat) && !Number.isNaN(lng)) {
-        userCoords.value = { lat, lng }
-      }
-    }
-  } catch {
-    // ignore
-  }
-  loadAnalysis()
-})
+
+
 
 const formatMeters = (value) => {
   if (value === null || value === undefined || Number.isNaN(Number(value))) return 'N/A'
@@ -671,9 +661,25 @@ const loadDetalleSector = async (sector) => {
 }
 
 onMounted(() => {
+  // cargar último valor si existe
+  try {
+    const saved = localStorage.getItem('userCoords')
+    if (saved) {
+      const parsed = JSON.parse(saved)
+      const lat = Number(parsed?.lat)
+      const lng = Number(parsed?.lng)
+      if (!Number.isNaN(lat) && !Number.isNaN(lng)) {
+        userCoords.value = { lat, lng }
+      }
+    }
+  } catch {
+    // ignore
+  }
+
   loadAnalysis()
   loadZonasConcentracion()
 })
+
 
 </script>
 

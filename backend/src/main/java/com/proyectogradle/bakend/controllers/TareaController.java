@@ -193,8 +193,6 @@ public class TareaController {
     @GetMapping(value="/reportes/tareas-por-usuario-sector", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> reporte() {
         var data = tareaRepository.tareasRealizadasPorUsuarioYSector();
-        System.out.println("REPORTE data is null? " + (data == null));
-        System.out.println("REPORTE size: " + (data == null ? "null" : data.size()));
         return ResponseEntity
                 .ok()
                 .contentType(MediaType.APPLICATION_JSON)
