@@ -121,3 +121,4 @@ VALUES
  '2025-11-09', TRUE, 6, 2,
  ST_GeogFromText('SRID=4326;POINT(-70.5690 -33.4180)'));
 -- Fin de los datos de carga
+
