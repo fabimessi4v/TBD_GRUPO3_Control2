@@ -56,6 +56,22 @@ VALUES
 ('Concepción Centro', 'Corazón de la ciudad universitaria y comercial',
  ST_GeogFromText('SRID=4326;POINT(-73.0500 -36.8200)'));
 
+
+
+
+--Inserta categorías
+
+INSERT INTO categoria (nombre, descripcion)
+VALUES
+('Mantenimiento', 'Tareas relacionadas con el mantenimiento de equipos e infraestructuras'),
+('Inspección', 'Tareas de inspección y verificación de sistemas y áreas'),
+('Instalación', 'Tareas de instalación de nuevos equipos o sistemas'),
+('Monitoreo', 'Tareas de monitoreo ambiental y de seguridad'),
+('Construcción', 'Tareas relacionadas con obras y construcción'),
+('Planeamiento', 'Tareas de planificación y evaluación de proyectos');
+
+
+
 -- Inserta tareas
 INSERT INTO tarea (titulo, descripcion, fecha_vencimiento, completada, id_usuario, id_sector, ubicacion)
 VALUES
