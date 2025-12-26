@@ -66,8 +66,8 @@ public class WebSecurityConfig {
                 .exceptionHandling(ex -> ex.authenticationEntryPoint(unauthorizedHandler))
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth ->
-                        auth.requestMatchers("/api/auth/**", "/api/agregaciondedatos/**", "/api/mediciones/**",
-                                        "/api/puntos/correlacion","/api/numerotareas/**", "/api/promedios/**" , "/api/usuario/**",
+                        auth.requestMatchers("/api/auth/**", "/api/agregaciondedatos/**", "/api/mediciones/**", "api/tareas/**",
+                                        "/api/puntos/correlacion","/api/numerotareas/**", "/api/promedios/**" , "/api/usuario/**", "/api/notificaciones/fechavencimiento",
                                         "/api/tarea/pendientes-por-sector", "/api/tarea/pendientes-por-sector/**", "/api/tarea/mascercana").permitAll()
                                 .anyRequest().authenticated()
                 )

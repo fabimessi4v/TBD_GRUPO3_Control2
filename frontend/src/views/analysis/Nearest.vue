@@ -194,20 +194,16 @@
         </v-card>
       </v-col>
 
-      <!-- 5) Card: top sector 2km -->
-      <v-col cols="12">
-        <v-card border flat class="rounded-lg">
-          <v-card-item>
-            <template #prepend>
-              <v-icon icon="mdi-map-marker-radius" color="success" size="x-large" />
+      <!-- 6) Card: Top sector (2km) -->
+      <v-col cols="12" md="5">
+        <v-card border flat>
+          <v-card-item title="Top sector (2km)">
+            <template v-slot:subtitle>
+              Sector con más tareas completadas dentro de 2km
             </template>
-            <v-card-title class="font-weight-bold">Top sector (2km)</v-card-title>
-            <v-card-subtitle>Sector con más tareas completadas dentro de 2km</v-card-subtitle>
           </v-card-item>
 
-          <v-divider />
-
-          <v-card-text class="py-4">
+          <v-card-text class="pt-0">
             <div v-if="topCompletedSector2km" class="d-flex align-start ga-3">
               <v-avatar color="green-lighten-4" size="40" class="mt-1">
                 <v-icon icon="mdi-check-decagram" color="green-darken-2" />
@@ -226,15 +222,12 @@
                 +{{ topCompletedSector2km.completedCount ?? 0 }}
               </v-chip>
             </div>
-
             <div v-else class="text-body-2 text-medium-emphasis">
               Sin datos para mostrar.
             </div>
           </v-card-text>
         </v-card>
       </v-col>
-
-      
       <v-col cols="12" md="5">
         <v-card border flat>
           <v-card-item title="Zonas de Concentración">
@@ -288,6 +281,33 @@
                   />
                 </v-list>
 
+              </v-expansion-panel-text>
+            </v-expansion-panel>
+          </v-expansion-panels>
+       </v-card>
+      </v-col>
+      <v-col cols="12" md="5">
+        <v-card border flat>
+          <v-card-item title="Zonas de Concentración">
+            <template v-slot:subtitle>
+              Sectores con más tareas terminadas
+            </template>
+          </v-card-item>
+
+          <v-expansion-panels variant="accordion" class="pa-2">
+            <v-expansion-panel v-for="cluster in analysisData.clusters" :key="cluster.sectorName" elevation="0"
+              class="border-thin">
+              <v-expansion-panel-title>
+                <v-badge :content="cluster.pendingCount" color="success" inline>
+                  <span class="font-weight-medium">{{ cluster.sectorName }}</span>
+                </v-badge>
+              </v-expansion-panel-title>
+
+              <v-expansion-panel-text>
+                <v-list density="compact">
+                  <v-list-item v-for="task in cluster.tasks" :key="task.id" :title="task.title"
+                    prepend-icon="mdi-alert-circle-outline" />
+                </v-list>
               </v-expansion-panel-text>
             </v-expansion-panel>
           </v-expansion-panels>
