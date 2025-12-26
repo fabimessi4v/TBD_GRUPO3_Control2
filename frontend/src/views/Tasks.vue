@@ -62,6 +62,48 @@
       class="mb-4"
     />
 
+    <!-- FILTROS -->
+    <v-row dense class="mb-4">
+      <v-col cols="12" md="4">
+        <v-text-field
+          v-model.number="filterSector"
+          label="ID Sector"
+          variant="outlined"
+          hide-details
+        />
+      </v-col>
+
+      <v-col cols="12" md="4">
+        <v-select
+          v-model="filterEstado"
+          :items="['PENDIENTE', 'COMPLETADA']"
+          label="Estado"
+          variant="outlined"
+          hide-details
+        />
+      </v-col>
+
+      <v-col cols="12" md="4">
+        <v-select
+          v-model="filterPrioridad"
+          :items="['ALTA', 'MEDIA', 'BAJA']"
+          label="Prioridad"
+          variant="outlined"
+          hide-details
+        />
+      </v-col>
+    </v-row>
+
+    <div class="d-flex justify-end mb-4">
+      <v-btn
+        variant="outlined"
+        color="primary"
+        @click="clearFilters"
+      >
+        Limpiar filtros
+      </v-btn>
+    </div>
+
     <!-- LISTA VERTICAL (SIN SCROLL INTERNO) -->
     <v-alert
       v-if="errorMessage"
@@ -103,7 +145,7 @@
           <!-- Meta -->
           <div class="text-caption text-medium-emphasis mb-2">
             📅 {{ task.fechaVencimiento || 'Sin vencimiento' }} ·
-            🏷 Sector: {{ task.idSector ?? '-' }}
+            🏷 Sector: {{ task.idSector ?? '-' }} ·
           </div>
 
           <!-- Ubicación -->
@@ -413,6 +455,13 @@ export default {
         longitud: -70.6482,
       },
       search: '',
+
+      filterSector: null,
+      filterEstado: null,
+      filterPrioridad: null,
+      estadoItems: ['PENDIENTE', 'COMPLETADA'],
+      prioridadItems: ['ALTA', 'MEDIA', 'BAJA'],
+
       loading: false,
       errorMessage: '',
       headers: [
@@ -471,6 +520,7 @@ export default {
     this.cargarTareas()
     this.cargarNotificaciones()
   },
+
   beforeUnmount() {
     if (this.map) {
       this.map.remove()
@@ -482,6 +532,34 @@ export default {
     }
   },
   methods: {
+    clearFilters() {
+      this.search = ''
+      this.filterSector = null
+      this.filterEstado = null
+      this.filterPrioridad = null
+    },
+
+    getPrioridadPorVencimiento(fechaVencimiento) {
+      if (!fechaVencimiento) return null;
+
+      // "YYYY-MM-DD" seguro
+      const base = String(fechaVencimiento).split("T")[0];
+      const [y, m, d] = base.split("-").map(Number);
+
+      const hoy = new Date();
+      hoy.setHours(0, 0, 0, 0);
+
+      const venc = new Date(y, m - 1, d);
+      venc.setHours(0, 0, 0, 0);
+
+      const diffDias = Math.ceil((venc - hoy) / (1000 * 60 * 60 * 24));
+
+      if (diffDias <= 0) return "ALTA";
+      if (diffDias < 30) return "ALTA";
+      if (diffDias < 60) return "MEDIA";
+      return "BAJA";
+    },
+
     getRow(item) {
       return item?.raw ?? item
     },
@@ -624,9 +702,20 @@ export default {
           // coordenadas (pueden venir null)
           latitud: t.latitud ?? null,
           longitud: t.longitud ?? null,
+          prioridad: this.getPrioridadPorVencimiento(t.fechaVencimiento),
 
           _raw: t,
         }))
+        console.log(
+          this.tasks.map(t => ({
+            titulo: t.title,
+            fecha: t.fechaVencimiento,
+            prioridad: t.prioridad,
+            sector: t.idSector,
+            completed: t.completed
+          }))
+        );
+
       } catch (error) {
         console.error("Error al obtener tareas:", error)
         this.errorMessage =
@@ -773,16 +862,46 @@ export default {
       this.updateTask()
     },
   },
+
   computed: {
   filteredTasks() {
-    if (!this.search) return this.tasks
-    const q = this.search.toLowerCase()
-    return this.tasks.filter(t =>
-      t.title?.toLowerCase().includes(q) ||
-      t.description?.toLowerCase().includes(q)
-    )
+    return this.tasks
+      .filter(t => {
+        const q = this.search.toLowerCase()
+
+        const matchSearch =
+          !this.search ||
+          t.title?.toLowerCase().includes(q) ||
+          t.description?.toLowerCase().includes(q)
+
+        const matchSector =
+          this.filterSector == null || this.filterSector === '' ||
+          t.idSector === Number(this.filterSector)
+
+        const matchEstado =
+          this.filterEstado == null ||
+          (this.filterEstado === 'COMPLETADA' && t.completed) ||
+          (this.filterEstado === 'PENDIENTE' && !t.completed)
+
+        const matchPrioridad =
+          this.filterPrioridad == null || this.filterPrioridad === '' ||
+          (t.prioridad ?? '').toString().trim().toUpperCase() ===
+          (this.filterPrioridad ?? '').toString().trim().toUpperCase()
+
+
+        return matchSearch && matchSector && matchEstado && matchPrioridad
+      })
+      .sort((a, b) => {
+        const da = a.fechaVencimiento
+          ? new Date(a.fechaVencimiento).getTime()
+          : Infinity
+        const db = b.fechaVencimiento
+          ? new Date(b.fechaVencimiento).getTime()
+          : Infinity
+        return da - db
+      })
   },
-}
+},
 
 }
 </script>
