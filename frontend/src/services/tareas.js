@@ -1,4 +1,5 @@
 import apiClient from '@/services/axios'
+
 export default {
   // Obtener notificaciones
   getNotificaciones() {
@@ -32,6 +33,15 @@ export default {
   //actualizar tarea de usuario
   updateTask(id, taskData) {
   return apiClient.put(`/tareas/${id}`, taskData);
-}
+},
+  //Obtener tareas finalizadas para cada usuario por sector
+  getCompletedTasksBySector() {
+    return apiClient.get('tareas/reportes/tareas-por-usuario-sector');
+  },
+
+  //Obtener tareas sector con mas tareas finalizadas por todos los usuarios
+  getTopSectorByCompletedTasks() {
+    return apiClient.get('tareas/reportes/sector-top-5km');
+  }
 
 }

@@ -19,6 +19,14 @@ CREATE TABLE sector (
     ubicacion GEOGRAPHY(POINT, 4326) NOT NULL -- Punto fijo del sector
 );
 
+-- Tabla de categorias de tareas
+CREATE TABLE categoria (
+    id SERIAL PRIMARY KEY,
+    nombre VARCHAR(100) UNIQUE NOT NULL,
+    descripcion TEXT
+);
+
+
 -- Tabla de tareas
 CREATE TABLE tarea (
     id SERIAL PRIMARY KEY,
@@ -28,9 +36,11 @@ CREATE TABLE tarea (
     completada BOOLEAN DEFAULT FALSE,
     id_usuario INT REFERENCES usuario(id) ON DELETE CASCADE,
     id_sector INT REFERENCES sector(id) ON DELETE SET NULL,
+    id_categoria INT REFERENCES categoria(id) ON DELETE CASCADE,
     ubicacion GEOGRAPHY(POINT, 4326) NOT NULL, -- Ubicación espacial de la tarea
     creada_en TIMESTAMP DEFAULT NOW()
 );
+
 
 -- Indices espaciales
 CREATE INDEX idx_usuario_ubicacion

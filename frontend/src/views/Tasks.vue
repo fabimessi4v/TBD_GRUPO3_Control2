@@ -1,11 +1,17 @@
 <template>
   <v-container>
-    <div class="d-flex align-center mb-6 position-relative">
 
+    <!-- HEADER -->
+    <div class="d-flex align-center mb-4 position-relative">
       <!-- Notificaciones -->
       <v-menu location="bottom start">
         <template #activator="{ props }">
-          <v-badge :content="notificaciones.length" :model-value="notificaciones.length > 0" color="error" overlap>
+          <v-badge
+            :content="notificaciones.length"
+            :model-value="notificaciones.length > 0"
+            color="error"
+            overlap
+          >
             <v-btn icon v-bind="props" variant="text">
               <v-icon>mdi-bell</v-icon>
             </v-btn>
@@ -16,228 +22,37 @@
           <v-card-title class="text-subtitle-1">Notificaciones</v-card-title>
           <v-divider />
           <v-list density="compact">
-            <v-list-item v-for="(n, i) in notificaciones" :key="i">
+            <v-list-item
+              v-for="(n, i) in notificaciones"
+              :key="i"
+            >
               <v-list-item-title>{{ n.titulo }}</v-list-item-title>
-              <v-list-item-subtitle>Vence el {{ n.fechaVencimiento }}</v-list-item-subtitle>
+              <v-list-item-subtitle>
+                Vence el {{ n.fechaVencimiento }}
+              </v-list-item-subtitle>
             </v-list-item>
 
             <v-list-item v-if="notificaciones.length === 0">
-              <v-list-item-title class="text-medium-emphasis">No hay tareas próximas</v-list-item-title>
+              <v-list-item-title class="text-medium-emphasis">
+                No hay tareas próximas
+              </v-list-item-title>
             </v-list-item>
           </v-list>
         </v-card>
       </v-menu>
-      <h1 class="text-h4 mx-auto">Mis Tareas</h1>
 
-      <!-- AÑADIR TAREAS FORMULARIO-->
-      <v-dialog v-model="dialog" max-width="500">
-        <template #activator="{ props }">
-          <v-btn v-bind="props" color="primary" prepend-icon="mdi-plus">
-            Nueva Tarea
-          </v-btn>
-        </template>
+      <h1 class="text-h5 mx-auto">Mis Tareas</h1>
 
-        <v-card>
-          <v-card-title>
-            <span class="text-h6">Crear Tarea</span>
-          </v-card-title>
-
-          <v-card-text>
-            <v-alert
-              v-if="dialogErrorMessage"
-              type="error"
-              variant="tonal"
-              density="comfortable"
-              class="mb-4"
-            >
-              {{ dialogErrorMessage }}
-            </v-alert>
-
-            <v-text-field
-              v-model="newTask.title"
-              label="Título"
-              variant="outlined"
-              required
-              class="mb-3"
-            />
-
-            <v-textarea
-              v-model="newTask.description"
-              label="Descripción"
-              variant="outlined"
-              auto-grow
-              rows="2"
-              class="mb-3"
-            />
-
-            <v-row dense class="mb-1">
-              <v-col cols="12" sm="6">
-                <v-text-field
-                  v-model="newTask.fechaVencimiento"
-                  label="Vencimiento"
-                  type="date"
-                  variant="outlined"
-                  density="comfortable"
-                />
-              </v-col>
-              <v-col cols="12" sm="6">
-                <v-text-field
-                  v-model.number="newTask.idSector"
-                  label="ID Sector"
-                  type="number"
-                  variant="outlined"
-                  density="comfortable"
-                />
-              </v-col>
-            </v-row>
-
-            <v-switch
-              v-model="editTaskForm.completed"
-              :label="editTaskForm.completed ? 'Completada' : 'Pendiente'"
-              color="success"
-              hide-details
-              class="mb-2"
-            />
-
-            <v-row dense class="mb-2">
-              <v-col cols="12" sm="6">
-                <v-text-field
-                  v-model.number="newTask.latitud"
-                  label="Latitud"
-                  type="number"
-                  variant="outlined"
-                  density="comfortable"
-                />
-              </v-col>
-              <v-col cols="12" sm="6">
-                <v-text-field
-                  v-model.number="newTask.longitud"
-                  label="Longitud"
-                  type="number"
-                  variant="outlined"
-                  density="comfortable"
-                />
-              </v-col>
-            </v-row>
-
-            <div class="map-wrap mb-2 border-thin elevation-4 rounded-lg">
-              <div class="text-caption text-medium-emphasis mb-2">
-                Selecciona la ubicación en el mapa (click).
-              </div>
-              <div ref="mapEl" class="leaflet-map" />
-            </div>
-          </v-card-text>
-
-          <v-card-actions>
-            <v-spacer />
-            <v-btn text @click="dialog = false">Cancelar</v-btn>
-            <v-btn color="primary" :loading="dialogLoading" @click="addTask">Guardar</v-btn>
-          </v-card-actions>
-        </v-card>
-      </v-dialog>
-
-      <!-- EDITAR TAREA FORMULARIO -->
-      <v-dialog v-model="editDialog" max-width="500">
-        <v-card>
-          <v-card-title>
-            <span class="text-h6">Editar Tarea</span>
-          </v-card-title>
-
-          <v-card-text>
-            <v-alert
-              v-if="editDialogErrorMessage"
-              type="error"
-              variant="tonal"
-              density="comfortable"
-              class="mb-4"
-            >
-              {{ editDialogErrorMessage }}
-            </v-alert>
-
-            <v-text-field
-              v-model="editTaskForm.title"
-              label="Título"
-              variant="outlined"
-              required
-              class="mb-3"
-            />
-
-            <v-textarea
-              v-model="editTaskForm.description"
-              label="Descripción"
-              variant="outlined"
-              auto-grow
-              rows="2"
-              class="mb-3"
-            />
-
-            <v-row dense class="mb-1">
-              <v-col cols="12" sm="6">
-                <v-text-field
-                  v-model="editTaskForm.fechaVencimiento"
-                  label="Vencimiento"
-                  type="date"
-                  variant="outlined"
-                  density="comfortable"
-                />
-              </v-col>
-              <v-col cols="12" sm="6">
-                <v-text-field
-                  v-model.number="editTaskForm.idSector"
-                  label="ID Sector"
-                  type="number"
-                  variant="outlined"
-                  density="comfortable"
-                />
-              </v-col>
-            </v-row>
-
-            <v-switch
-              v-model="editTaskForm.completed"
-              :label="editTaskForm.completed ? 'Completada' : 'Pendiente'"
-              color="success"
-              hide-details
-              class="mb-2"
-            />
-
-            <v-row dense class="mb-2">
-              <v-col cols="12" sm="6">
-                <v-text-field
-                  v-model.number="editTaskForm.latitud"
-                  label="Latitud"
-                  type="number"
-                  variant="outlined"
-                  density="comfortable"
-                />
-              </v-col>
-              <v-col cols="12" sm="6">
-                <v-text-field
-                  v-model.number="editTaskForm.longitud"
-                  label="Longitud"
-                  type="number"
-                  variant="outlined"
-                  density="comfortable"
-                />
-              </v-col>
-            </v-row>
-
-            <div class="map-wrap mb-2 border-thin elevation-4 rounded-lg">
-              <div class="text-caption text-medium-emphasis mb-2">
-                Selecciona la ubicación en el mapa (click).
-              </div>
-              <div ref="editMapEl" class="leaflet-map" />
-            </div>
-          </v-card-text>
-
-          <v-card-actions>
-            <v-spacer />
-            <v-btn text @click="editDialog = false">Cancelar</v-btn>
-            <v-btn color="primary" :loading="editDialogLoading" @click="saveEdit">Guardar cambios</v-btn>
-          </v-card-actions>
-        </v-card>
-      </v-dialog>
+      <v-btn
+        color="primary"
+        prepend-icon="mdi-plus"
+        @click="dialog = true"
+      >
+        Nueva
+      </v-btn>
     </div>
 
+    <!-- BUSCADOR -->
     <v-text-field
       v-model="search"
       label="Buscar tarea..."
@@ -245,75 +60,310 @@
       variant="outlined"
       hide-details
       class="mb-4"
-    ></v-text-field>
+    />
 
-    <v-card border flat>
+    <!-- LISTA VERTICAL (SIN SCROLL INTERNO) -->
+    <v-alert
+      v-if="errorMessage"
+      type="error"
+      variant="tonal"
+      class="mb-3"
+    >
+      {{ errorMessage }}
+    </v-alert>
+
+    <v-list density="comfortable" lines="two">
+
+      <v-list-item
+        v-for="task in filteredTasks"
+        :key="task.id"
+        class="mb-3"
+      >
+        <v-card variant="outlined" class="pa-3">
+
+          <!-- Título + estado -->
+          <div class="d-flex justify-space-between align-center mb-1">
+            <div class="task-title">
+              {{ task.title }}
+            </div>
+
+            <v-chip
+              :color="task.completed ? 'success' : 'warning'"
+              size="small"
+            >
+              {{ task.completed ? 'Completada' : 'Pendiente' }}
+            </v-chip>
+          </div>
+
+          <!-- Descripción -->
+          <div class="task-desc mb-2">
+            {{ task.description || 'Sin descripción' }}
+          </div>
+
+          <!-- Meta -->
+          <div class="text-caption text-medium-emphasis mb-2">
+            📅 {{ task.fechaVencimiento || 'Sin vencimiento' }} ·
+            🏷 Sector: {{ task.idSector ?? '-' }}
+          </div>
+
+          <!-- Ubicación -->
+          <div class="text-caption mb-2">
+            <v-icon size="small" color="red">mdi-map-marker</v-icon>
+            <span v-if="task.latitud != null && task.longitud != null">
+              {{ Number(task.latitud).toFixed(4) }},
+              {{ Number(task.longitud).toFixed(4) }}
+            </span>
+            <span v-else>-</span>
+          </div>
+
+          <!-- Acciones -->
+          <div class="d-flex justify-end">
+            <v-btn
+              icon
+              variant="text"
+              size="small"
+              color="blue"
+              @click="editTask(task)"
+            >
+              <v-icon>mdi-pencil</v-icon>
+            </v-btn>
+
+            <v-btn
+              icon
+              variant="text"
+              size="small"
+              color="error"
+              @click="deleteTask(task.id)"
+            >
+              <v-icon>mdi-delete</v-icon>
+            </v-btn>
+          </div>
+
+        </v-card>
+      </v-list-item>
+
+      <v-list-item v-if="filteredTasks.length === 0">
+        <v-list-item-title class="text-medium-emphasis">
+          No hay tareas para mostrar
+        </v-list-item-title>
+      </v-list-item>
+
+    </v-list>
+
+    <!-- DIALOGOS -->
+   <!-- DIALOG: CREAR TAREA -->
+<v-dialog v-model="dialog" max-width="520" attach="body">
+  <v-card>
+    <v-card-title class="text-h6 font-weight-bold">Crear Tarea</v-card-title>
+    <v-card-subtitle>Completa los datos y selecciona ubicación en el mapa.</v-card-subtitle>
+
+    <v-card-text>
       <v-alert
-        v-if="errorMessage"
+        v-if="dialogErrorMessage"
         type="error"
         variant="tonal"
+        density="comfortable"
         class="mb-4"
       >
-        {{ errorMessage }}
+        {{ dialogErrorMessage }}
       </v-alert>
 
-      <v-data-table
-        :headers="headers"
-        :items="tasks"
-        :search="search"
-        class="elevation-1"
-        :loading="loading"
+      <v-text-field
+        v-model="newTask.title"
+        label="Título"
+        variant="outlined"
+        required
+        class="mb-3"
+      />
+
+      <v-textarea
+        v-model="newTask.description"
+        label="Descripción"
+        variant="outlined"
+        auto-grow
+        rows="2"
+        class="mb-3"
+      />
+
+      <v-row dense class="mb-1">
+        <v-col cols="12" sm="6">
+          <v-text-field
+            v-model="newTask.fechaVencimiento"
+            label="Vencimiento"
+            type="date"
+            variant="outlined"
+            density="comfortable"
+          />
+        </v-col>
+        <v-col cols="12" sm="6">
+          <v-text-field
+            v-model.number="newTask.idSector"
+            label="ID Sector"
+            type="number"
+            variant="outlined"
+            density="comfortable"
+          />
+        </v-col>
+      </v-row>
+
+      <!-- TOGGLE COMPLETADA -->
+      <v-switch
+        v-model="newTask.completed"
+        :label="newTask.completed ? 'Completada' : 'Pendiente'"
+        color="success"
+        inset
+        hide-details
+        class="mb-3"
+      />
+
+      <v-row dense class="mb-2">
+        <v-col cols="12" sm="6">
+          <v-text-field
+            v-model.number="newTask.latitud"
+            label="Latitud"
+            type="number"
+            variant="outlined"
+            density="comfortable"
+          />
+        </v-col>
+        <v-col cols="12" sm="6">
+          <v-text-field
+            v-model.number="newTask.longitud"
+            label="Longitud"
+            type="number"
+            variant="outlined"
+            density="comfortable"
+          />
+        </v-col>
+      </v-row>
+
+      <div class="map-wrap mb-2 border-thin elevation-4 rounded-lg">
+        <div class="text-caption text-medium-emphasis mb-2">
+          Selecciona la ubicación en el mapa (click) o arrastra el marcador.
+        </div>
+        <div ref="mapEl" class="leaflet-map" />
+      </div>
+    </v-card-text>
+
+    <v-card-actions>
+      <v-spacer />
+      <v-btn variant="text" @click="dialog = false">Cancelar</v-btn>
+      <v-btn color="primary" :loading="dialogLoading" @click="createTask">
+        Guardar
+      </v-btn>
+    </v-card-actions>
+  </v-card>
+</v-dialog>
+
+<!-- DIALOG: EDITAR TAREA -->
+<v-dialog v-model="editDialog" max-width="520" attach="body">
+  <v-card>
+    <v-card-title class="text-h6 font-weight-bold">Editar Tarea</v-card-title>
+    <v-card-subtitle>Modifica los datos y ajusta la ubicación si lo necesitas.</v-card-subtitle>
+
+    <v-card-text>
+      <v-alert
+        v-if="editDialogErrorMessage"
+        type="error"
+        variant="tonal"
+        density="comfortable"
+        class="mb-4"
       >
-        <template #item="{ item }">
-          <!-- Vuetify puede entregar item como { raw: ... } o directamente el objeto -->
-          <template v-if="getRow(item)">
-          <tr>
-            <td>
-              <div class="task-title">{{ getRow(item).title }}</div>
-              <div class="task-desc">
-                {{ getRow(item).description || '-' }}
-              </div>
-            </td>
+        {{ editDialogErrorMessage }}
+      </v-alert>
 
-            <td>
-              <span class="text-body-2">{{ getRow(item).fechaVencimiento || '-' }}</span>
-            </td>
+      <v-text-field
+        v-model="editTaskForm.title"
+        label="Título"
+        variant="outlined"
+        required
+        class="mb-3"
+      />
 
-            <td class="text-center">
-              <v-chip :color="getRow(item).completed ? 'success' : 'warning'" size="small">
-                {{ getRow(item).completed ? 'Completada' : 'Pendiente' }}
-              </v-chip>
-            </td>
+      <v-textarea
+        v-model="editTaskForm.description"
+        label="Descripción"
+        variant="outlined"
+        auto-grow
+        rows="2"
+        class="mb-3"
+      />
 
-            <td class="text-center">
-              <span class="text-body-2">{{ getRow(item).idSector ?? '-' }}</span>
-            </td>
+      <v-row dense class="mb-1">
+        <v-col cols="12" sm="6">
+          <v-text-field
+            v-model="editTaskForm.fechaVencimiento"
+            label="Vencimiento"
+            type="date"
+            variant="outlined"
+            density="comfortable"
+          />
+        </v-col>
+        <v-col cols="12" sm="6">
+          <v-text-field
+            v-model.number="editTaskForm.idSector"
+            label="ID Sector"
+            type="number"
+            variant="outlined"
+            density="comfortable"
+          />
+        </v-col>
+      </v-row>
 
-            <td>
-              <div class="text-caption">
-                <v-icon size="small" color="red">mdi-map-marker</v-icon>
-                <span v-if="getRow(item).latitud != null && getRow(item).longitud != null">
-                  {{ Number(getRow(item).latitud).toFixed(4) }}, {{ Number(getRow(item).longitud).toFixed(4) }}
-                </span>
-                <span v-else>-</span>
-              </div>
-            </td>
+      <!-- TOGGLE COMPLETADA -->
+      <v-switch
+        v-model="editTaskForm.completed"
+        :label="editTaskForm.completed ? 'Completada' : 'Pendiente'"
+        color="success"
+        inset
+        hide-details
+        class="mb-3"
+      />
 
-            <td class="text-end">
-              <v-btn icon variant="text" color="blue" @click="editTask(getRow(item))" size="small">
-                <v-icon>mdi-pencil</v-icon>
-              </v-btn>
-              <v-btn icon variant="text" color="error" @click="deleteTask(getRow(item).id)" size="small">
-                <v-icon>mdi-delete</v-icon>
-              </v-btn>
-            </td>
-          </tr>
-          </template>
-        </template>
-      </v-data-table>
-    </v-card>
+      <v-row dense class="mb-2">
+        <v-col cols="12" sm="6">
+          <v-text-field
+            v-model.number="editTaskForm.latitud"
+            label="Latitud"
+            type="number"
+            variant="outlined"
+            density="comfortable"
+          />
+        </v-col>
+        <v-col cols="12" sm="6">
+          <v-text-field
+            v-model.number="editTaskForm.longitud"
+            label="Longitud"
+            type="number"
+            variant="outlined"
+            density="comfortable"
+          />
+        </v-col>
+      </v-row>
+
+      <div class="map-wrap mb-2 border-thin elevation-4 rounded-lg">
+        <div class="text-caption text-medium-emphasis mb-2">
+          Selecciona la ubicación en el mapa (click) o arrastra el marcador.
+        </div>
+        <div ref="editMapEl" class="leaflet-map" />
+      </div>
+    </v-card-text>
+
+    <v-card-actions>
+      <v-spacer />
+      <v-btn variant="text" @click="editDialog = false">Cancelar</v-btn>
+      <v-btn color="primary" :loading="editDialogLoading" @click="updateTask">
+        Guardar cambios
+      </v-btn>
+    </v-card-actions>
+  </v-card>
+</v-dialog>
+
+
+
   </v-container>
 </template>
+
 
 <script>
 import tareas from '@/services/tareas';
@@ -387,19 +437,23 @@ export default {
   },
   watch: {
     dialog(isOpen) {
-      if (isOpen) {
-        this.dialogErrorMessage = ''
-        this.dialogLoading = false
-        this.$nextTick(() => this.initMap())
-      }
-    },
+    if (isOpen) {
+      this.dialogErrorMessage = ''
+      this.dialogLoading = false
+      this.$nextTick(() => this.initMap())
+    } else {
+      this.destroyMap()
+    }
+  },
     editDialog(isOpen) {
-      if (isOpen) {
-        this.editDialogErrorMessage = ''
-        this.editDialogLoading = false
-        this.$nextTick(() => this.initEditMap())
-      }
-    },
+    if (isOpen) {
+      this.editDialogErrorMessage = ''
+      this.editDialogLoading = false
+      this.$nextTick(() => this.initEditMap())
+    } else {
+      this.destroyEditMap()
+    }
+  },
     'newTask.latitud'() {
       this.syncMarkerFromFields()
     },
@@ -449,7 +503,22 @@ export default {
         latitud: -33.4489,
         longitud: -70.6482,
       }
+      
     },
+    destroyMap() {
+    if (this.map) {
+      this.map.remove()
+      this.map = null
+      this.marker = null
+    }
+  },
+  destroyEditMap() {
+    if (this.editMap) {
+      this.editMap.remove()
+      this.editMap = null
+      this.editMarker = null
+    }
+  },
     initMap() {
       // El dialog se monta/desmonta; si ya existe el mapa no lo recreamos.
       if (this.map || !this.$refs.mapEl) return
@@ -704,6 +773,17 @@ export default {
       this.updateTask()
     },
   },
+  computed: {
+  filteredTasks() {
+    if (!this.search) return this.tasks
+    const q = this.search.toLowerCase()
+    return this.tasks.filter(t =>
+      t.title?.toLowerCase().includes(q) ||
+      t.description?.toLowerCase().includes(q)
+    )
+  },
+}
+
 }
 </script>
 
@@ -751,5 +831,18 @@ export default {
     -webkit-box-orient: vertical;
     overflow: hidden;
   }
+  .task-title {
+  font-weight: 600;
+  font-size: 1rem;
+  line-height: 1.2;
+}
+
+.task-desc {
+  font-size: 0.85rem;
+  color: rgba(0, 0, 0, 0.65);
+  white-space: normal;
+  word-break: break-word;
+}
+
 }
 </style>

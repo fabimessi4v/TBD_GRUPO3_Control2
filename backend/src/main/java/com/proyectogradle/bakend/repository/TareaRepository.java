@@ -1,5 +1,7 @@
 package com.proyectogradle.bakend.repository;
 
+import com.proyectogradle.bakend.DTO.SectorTopDTO;
+import com.proyectogradle.bakend.DTO.TareasPorUsuarioSectorDTO;
 import com.proyectogradle.bakend.entities.Sector;
 import com.proyectogradle.bakend.entities.Tarea;
 import com.proyectogradle.bakend.entities.Usuario;
@@ -28,6 +30,24 @@ public class TareaRepository {
     public TareaRepository(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
+
+    private final RowMapper<TareasPorUsuarioSectorDTO> reporteRowMapper =
+            (rs, rowNum) -> new TareasPorUsuarioSectorDTO(
+                    rs.getString("username"),
+                    rs.getString("sector"),
+                    (int) rs.getLong("tareas_realizadas")
+            );
+
+
+
+    private final RowMapper<SectorTopDTO> sectorTopRowMapper = (rs, rowNum) ->
+            new SectorTopDTO(
+                    rs.getLong("sector_id"),
+                    rs.getString("sector"),
+                    rs.getInt("tareas_completadas_5km")
+            );
+
+
 
     // RowMapper para convertir de ResultSet a Tarea.
     // Este objeto mapea los nombres de las columnas de la tabla 'tarea' a los
@@ -221,5 +241,63 @@ public class TareaRepository {
         return jdbcTemplate.query(sql, tareaRowMapper, username);
     }
 
+    /**
+     * @return Busca, cuenta y agrupa tareas tanto por usuario como por el sector en que se realizó(solo tareas completadas)
+     */
+
+    public List<TareasPorUsuarioSectorDTO> tareasRealizadasPorUsuarioYSector() {
+
+        String sql =
+                "SELECT u.username AS username, " +
+                        "       s.nombre  AS sector, " +
+                        "       COUNT(*)  AS tareas_realizadas " +
+                        "FROM tarea t " +
+                        "JOIN usuario u ON u.id = t.id_usuario " +
+                        "JOIN sector s ON s.id = t.id_sector " +
+                        "WHERE t.completada = TRUE " +
+                        "GROUP BY u.username, s.nombre " +
+                        "ORDER BY u.username, s.nombre";
+
+        System.out.println("SQL = " + sql);
+
+        // Debug (sólo imprime labels, no afecta el resultado final)
+        jdbcTemplate.query(sql, rs -> {
+            var md = rs.getMetaData();
+            for (int i = 1; i <= md.getColumnCount(); i++) {
+                System.out.println("COL " + i + ": " + md.getColumnLabel(i));
+            }
+            return null;
+        });
+
+        // Query real
+        return jdbcTemplate.query(sql, reporteRowMapper);
+    }
+
+
+
+
+
+
+    public SectorTopDTO sectorConMasTareasCompletadasDentro5km(long userId) {
+
+        String sql =
+                "SELECT s.id AS sector_id, s.nombre AS sector, COUNT(*) AS tareas_completadas_5km " +
+                        "FROM tarea t " +
+                        "JOIN sector s ON s.id = t.id_sector " +
+                        "WHERE t.completada = TRUE " +
+                        "  AND ST_DWithin(t.ubicacion, (SELECT u.ubicacion FROM usuario u WHERE u.id = ?), 5000) " +
+                        "GROUP BY s.id, s.nombre " +
+                        "ORDER BY tareas_completadas_5km DESC " +
+                        "LIMIT 1";
+
+        List<SectorTopDTO> res = jdbcTemplate.query(sql, sectorTopRowMapper, userId);
+        return res.isEmpty() ? null : res.get(0);
+    }
+
+
 
 }
+
+
+
+

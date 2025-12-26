@@ -1,169 +1,206 @@
 <template>
   <v-container fluid class="bg-grey-lighten-4 align-start">
-    <v-row>
+    <v-row class="ga-4">
+
+      <!-- Header -->
       <v-col cols="12">
-        <div class="d-flex align-center mb-4">
-          <v-icon icon="mdi-analytics" size="large" color="primary" class="me-3"></v-icon>
+        <div class="d-flex align-center mb-3">
+          <v-icon icon="mdi-analytics" size="large" color="primary" class="me-3" />
           <h1 class="text-h4 font-weight-bold">Análisis Geoespacial</h1>
         </div>
-        <v-divider></v-divider>
+        <v-divider />
       </v-col>
 
-      <v-col cols="12" md="4">
-        <v-card variant="elevated" elevation="2">
+      <!-- 1) Tarea más cercana -->
+      <v-col cols="12">
+        <v-card variant="elevated" elevation="2" class="rounded-lg">
           <v-card-item>
-            <template v-slot:prepend>
-              <v-icon icon="mdi-target" size="x-large"></v-icon>
+            <template #prepend>
+              <v-icon icon="mdi-target" size="x-large" color="primary" />
             </template>
-            <v-card-title>Tarea más cercana</v-card-title>
+            <v-card-title class="font-weight-bold">Tarea más cercana</v-card-title>
             <v-card-subtitle>Basado en tu ubicación actual</v-card-subtitle>
           </v-card-item>
-          <v-card-text class="text-center py-4">
-            <div class="text-h4 font-weight-bold">{{ analysisData.nearestTask.title || 'Cargando...' }}</div>
-            <div class="text-h6 mt-2">{{ analysisData.nearestTask.distance }} metros de distancia</div>
+
+          <v-divider />
+
+          <v-card-text class="py-4">
+            <div class="text-center">
+              <div class="text-h5 font-weight-bold">
+                {{ analysisData.nearestTask.title || 'Cargando...' }}
+              </div>
+              <div class="text-body-1 mt-2">
+                <span class="font-weight-medium">{{ analysisData.nearestTask.distance }}</span>
+                metros de distancia
+              </div>
+            </div>
           </v-card-text>
         </v-card>
       </v-col>
 
-      <v-col cols="12" md="4">
-        <v-card variant="elevated" elevation="2">
+      <!-- 2) Promedio de distancia (card simple) -->
+      <v-col cols="12">
+        <v-card variant="elevated" elevation="2" class="rounded-lg">
           <v-card-item>
-            <template v-slot:prepend>
-              <v-icon icon="mdi-ruler-square" color="secondary" size="x-large"></v-icon>
+            <template #prepend>
+              <v-icon icon="mdi-ruler-square" color="secondary" size="x-large" />
             </template>
-            <v-card-title>Promedio de Distancia</v-card-title>
+            <v-card-title class="font-weight-bold">Promedio de Distancia</v-card-title>
             <v-card-subtitle>Tareas completadas vs Usuario</v-card-subtitle>
           </v-card-item>
+
+          <v-divider />
+
           <v-card-text class="text-center py-4">
             <div class="text-h3 font-weight-black text-secondary">
-              {{ analysisData.avgDistance }} <span class="text-h5">km</span>
+              {{ analysisData.avgDistance }}
+              <span class="text-h5">km</span>
             </div>
           </v-card-text>
         </v-card>
       </v-col>
 
-      <v-col cols="12" md="4">
-        <v-card variant="elevated" elevation="2">
+      <!-- 3) Ubicación registrada -->
+      <v-col cols="12">
+        <v-card variant="elevated" elevation="2" class="rounded-lg">
           <v-card-item>
-            <template v-slot:prepend>
-              <v-icon icon="mdi-account-location" color="info" size="x-large"></v-icon>
+            <template #prepend>
+              <v-icon icon="mdi-account-location" color="info" size="x-large" />
             </template>
-            <v-card-title>Ubicación Registrada</v-card-title>
+            <v-card-title class="font-weight-bold">Ubicación Registrada</v-card-title>
             <v-card-subtitle>Coordenadas PostGIS</v-card-subtitle>
           </v-card-item>
-          <v-card-text class="text-center py-4">
-            <div class="text-body-1 font-italic">
-              Lat: {{ userCoords.lat }} / Lng: {{ userCoords.lng }}
-            </div>
-            <div class="d-flex justify-center ga-2 mt-2">
-              <v-btn
-                variant="text"
-                color="info"
-                size="small"
-                prepend-icon="mdi-map-marker"
-                @click="openLocationDialog"
-              >
-                Cambiar en mapa
-              </v-btn>
+
+          <v-divider />
+
+          <v-card-text class="py-4">
+            <div class="text-center">
+              <div class="text-body-1 font-italic">
+                Lat: {{ userCoords.lat }} / Lng: {{ userCoords.lng }}
+              </div>
+
+              <div class="d-flex justify-center mt-3">
+                <v-btn
+                  variant="tonal"
+                  color="info"
+                  prepend-icon="mdi-map-marker"
+                  @click="openLocationDialog"
+                >
+                  Cambiar en mapa
+                </v-btn>
+              </div>
             </div>
           </v-card-text>
         </v-card>
       </v-col>
 
-      <!-- Popup: Seleccionar ubicación -->
-      <v-dialog v-model="locationDialog" max-width="720">
-        <v-card>
-          <v-card-title class="text-subtitle-1 font-weight-bold">
-            Selecciona tu ubicación
-          </v-card-title>
-          <v-card-subtitle>
-            Click o arrastra el marcador para ajustar latitud/longitud.
-          </v-card-subtitle>
+      <!-- Popup: Seleccionar ubicación (igual que antes) -->
+      <v-col cols="12">
+        <v-dialog v-model="locationDialog" max-width="720">
+          <v-card>
+            <v-card-title class="text-subtitle-1 font-weight-bold">
+              Selecciona tu ubicación
+            </v-card-title>
+            <v-card-subtitle>
+              Click o arrastra el marcador para ajustar latitud/longitud.
+            </v-card-subtitle>
 
-          <v-card-text>
-            <div class="leaflet-map" ref="locationMapEl" />
+            <v-card-text>
+              <div class="leaflet-map" ref="locationMapEl" />
 
-            <v-row class="mt-3" dense>
-              <v-col cols="12" sm="6">
-                <v-text-field
-                  v-model="locationDraft.lat"
-                  label="Latitud"
-                  density="comfortable"
-                  variant="outlined"
-                />
-              </v-col>
-              <v-col cols="12" sm="6">
-                <v-text-field
-                  v-model="locationDraft.lng"
-                  label="Longitud"
-                  density="comfortable"
-                  variant="outlined"
-                />
-              </v-col>
-            </v-row>
-          </v-card-text>
+              <v-row class="mt-3" dense>
+                <v-col cols="12" sm="6">
+                  <v-text-field
+                    v-model="locationDraft.lat"
+                    label="Latitud"
+                    density="comfortable"
+                    variant="outlined"
+                  />
+                </v-col>
+                <v-col cols="12" sm="6">
+                  <v-text-field
+                    v-model="locationDraft.lng"
+                    label="Longitud"
+                    density="comfortable"
+                    variant="outlined"
+                  />
+                </v-col>
+              </v-row>
+            </v-card-text>
 
-          <v-card-actions>
-            <v-spacer />
-            <v-btn variant="text" :disabled="savingLocation" @click="closeLocationDialog">Cancelar</v-btn>
-            <v-btn color="primary" variant="flat" :loading="savingLocation" @click="saveLocation">
-              Guardar
-            </v-btn>
-          </v-card-actions>
+            <v-card-actions>
+              <v-spacer />
+              <v-btn variant="text" :disabled="savingLocation" @click="closeLocationDialog">
+                Cancelar
+              </v-btn>
+              <v-btn color="primary" variant="flat" :loading="savingLocation" @click="saveLocation">
+                Guardar
+              </v-btn>
+            </v-card-actions>
 
-          <v-alert
-            v-if="locationError"
-            type="error"
-            variant="tonal"
-            density="compact"
-            class="mx-4 mb-4"
-          >
-            {{ locationError }}
-          </v-alert>
-        </v-card>
-      </v-dialog>
+            <v-alert
+              v-if="locationError"
+              type="error"
+              variant="tonal"
+              density="compact"
+              class="mx-4 mb-4"
+            >
+              {{ locationError }}
+            </v-alert>
+          </v-card>
+        </v-dialog>
+      </v-col>
 
-      <v-col cols="12" md="5">
-        <v-card border flat>
-          <v-toolbar flat color="white">
-            <v-toolbar-title class="font-weight-bold text-no-wrap">
+      <!-- 4) Card: promedio distancia tareas completadas -->
+      <v-col cols="12">
+        <v-card border flat class="rounded-lg">
+          <v-card-item>
+            <template #prepend>
+              <v-icon icon="mdi-map-clock" color="secondary" size="x-large" />
+            </template>
+            <v-card-title class="font-weight-bold">
               Promedio distancia (tareas completadas)
-            </v-toolbar-title>
-          </v-toolbar>
-          
-          <v-divider></v-divider>
+            </v-card-title>
+            <v-card-subtitle>
+              Distancia promedio entre tu ubicación y tus tareas completadas
+            </v-card-subtitle>
+          </v-card-item>
 
-          <div class="pa-3">
-            <div class="d-flex align-center justify-space-between">
+          <v-divider />
+
+          <v-card-text class="py-4">
+            <div class="d-flex justify-space-between align-center mb-2">
               <v-chip v-if="avgDistanceStats" color="secondary" variant="tonal" size="small">
                 {{ avgDistanceStats.username || 'Usuario' }}
               </v-chip>
             </div>
 
-            <div class="text-center py-3">
+            <div class="text-center">
               <div
                 class="text-h4 font-weight-black"
                 :class="avgDistanceStats ? 'text-secondary' : 'text-medium-emphasis'"
               >
                 {{ avgDistanceStats ? formatMeters(avgDistanceStats.promedioDistanciaMetros) : 'N/A' }}
               </div>
-              <div class="text-body-2 text-medium-emphasis mt-2">
-                Distancia promedio entre tu ubicación y tus tareas completadas
-              </div>
             </div>
-          </div>
+          </v-card-text>
         </v-card>
       </v-col>
 
-      <v-col cols="12" md="5">
-        <v-card border flat>
-          <v-card-item title="Top sector (2km)">
-            <template v-slot:subtitle>
-              Sector con más tareas completadas dentro de 2km
+      <!-- 5) Card: top sector 2km -->
+      <v-col cols="12">
+        <v-card border flat class="rounded-lg">
+          <v-card-item>
+            <template #prepend>
+              <v-icon icon="mdi-map-marker-radius" color="success" size="x-large" />
             </template>
+            <v-card-title class="font-weight-bold">Top sector (2km)</v-card-title>
+            <v-card-subtitle>Sector con más tareas completadas dentro de 2km</v-card-subtitle>
           </v-card-item>
 
-          <v-card-text class="pt-0">
+          <v-divider />
+
+          <v-card-text class="py-4">
             <div v-if="topCompletedSector2km" class="d-flex align-start ga-3">
               <v-avatar color="green-lighten-4" size="40" class="mt-1">
                 <v-icon icon="mdi-check-decagram" color="green-darken-2" />
@@ -173,7 +210,6 @@
                 <div class="text-h6 font-weight-bold">
                   {{ topCompletedSector2km.sectorName || 'Sector' }}
                 </div>
-
                 <div class="text-body-2 text-medium-emphasis">
                   {{ topCompletedSector2km.completedCount ?? 0 }} tareas completadas
                 </div>
@@ -183,39 +219,64 @@
                 +{{ topCompletedSector2km.completedCount ?? 0 }}
               </v-chip>
             </div>
+
             <div v-else class="text-body-2 text-medium-emphasis">
               Sin datos para mostrar.
             </div>
           </v-card-text>
         </v-card>
       </v-col>
-      <v-col cols="12" md="5">
-        <v-card border flat>
-          <v-card-item title="Zonas de Concentración">
-            <template v-slot:subtitle>
-              Sectores con más tareas terminadas (Clustering)
+
+      <!-- 6) Card: Clustering -->
+      <v-col cols="12">
+        <v-card border flat class="rounded-lg">
+          <v-card-item>
+            <template #prepend>
+              <v-icon icon="mdi-chart-scatter-plot" color="primary" size="x-large" />
             </template>
+            <v-card-title class="font-weight-bold">Zonas de Concentración</v-card-title>
+            <v-card-subtitle>Sectores con más tareas terminadas (Clustering)</v-card-subtitle>
           </v-card-item>
 
-          <v-expansion-panels variant="accordion" class="pa-2">
-            <v-expansion-panel v-for="cluster in analysisData.clusters" :key="cluster.sectorName" elevation="0"
-              class="border-thin">
-              <v-expansion-panel-title>
-                <v-badge :content="cluster.pendingCount" color="success" inline>
-                  <span class="font-weight-medium">{{ cluster.sectorName }}</span>
-                </v-badge>
-              </v-expansion-panel-title>
+          <v-divider />
 
-              <v-expansion-panel-text>
-                <v-list density="compact">
-                  <v-list-item v-for="task in cluster.tasks" :key="task.id" :title="task.title"
-                    prepend-icon="mdi-alert-circle-outline" />
-                </v-list>
-              </v-expansion-panel-text>
-            </v-expansion-panel>
-          </v-expansion-panels>
+          <v-card-text class="pt-2">
+            <v-expansion-panels variant="accordion" class="pa-0">
+              <v-expansion-panel
+                v-for="cluster in analysisData.clusters"
+                :key="cluster.sectorName"
+                elevation="0"
+                class="border-thin"
+              >
+                <v-expansion-panel-title>
+                  <v-badge :content="cluster.pendingCount" color="success" inline>
+                    <span class="font-weight-medium">{{ cluster.sectorName }}</span>
+                  </v-badge>
+                </v-expansion-panel-title>
+
+                <v-expansion-panel-text>
+                  <v-list density="compact">
+                    <v-list-item
+                      v-for="task in cluster.tasks"
+                      :key="task.id"
+                      :title="task.title"
+                      prepend-icon="mdi-alert-circle-outline"
+                    />
+                  </v-list>
+                </v-expansion-panel-text>
+              </v-expansion-panel>
+
+              <div
+                v-if="!analysisData.clusters || analysisData.clusters.length === 0"
+                class="text-body-2 text-medium-emphasis pa-3"
+              >
+                Sin clusters para mostrar.
+              </div>
+            </v-expansion-panels>
+          </v-card-text>
         </v-card>
       </v-col>
+
     </v-row>
   </v-container>
 </template>
@@ -540,4 +601,26 @@ export default { name: 'AnalysisNearestView' }
     height: 260px;
   }
 }
+.border-thin {
+  border-bottom: 1px solid #e0e0e0 !important;
+}
+
+.leaflet-map {
+  height: 320px;
+  width: 100%;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+@media (max-width: 600px) {
+  .leaflet-map {
+    height: 260px;
+  }
+}
+
+/* opcional: hace que las cards se vean más consistentes */
+.rounded-lg {
+  border-radius: 16px;
+}
+
 </style>

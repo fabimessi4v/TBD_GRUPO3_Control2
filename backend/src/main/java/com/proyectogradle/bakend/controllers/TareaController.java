@@ -1,7 +1,9 @@
 package com.proyectogradle.bakend.controllers;
 
 import com.proyectogradle.bakend.DTO.MensajeRespuesta;
+import com.proyectogradle.bakend.DTO.SectorTopDTO;
 import com.proyectogradle.bakend.DTO.TareaRequest;
+import com.proyectogradle.bakend.DTO.TareasPorUsuarioSectorDTO;
 import com.proyectogradle.bakend.entities.Sector;
 import com.proyectogradle.bakend.entities.Tarea;
 import com.proyectogradle.bakend.entities.Usuario;
@@ -13,6 +15,7 @@ import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.geom.PrecisionModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -181,6 +184,41 @@ public class TareaController {
         // Retornamos 200 OK con la lista de tareas (estará vacía si el usuario no tiene)
         return ResponseEntity.ok(tareas);
     }
+
+
+    /**
+     * Obtener la cantidad de tareas finalizadas para cada usuario y en cada sector
+     * * GET /api/tareas/reportes/tareas-por-usuario-sector
+     */
+    @GetMapping(value="/reportes/tareas-por-usuario-sector", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> reporte() {
+        var data = tareaRepository.tareasRealizadasPorUsuarioYSector();
+        System.out.println("REPORTE data is null? " + (data == null));
+        System.out.println("REPORTE size: " + (data == null ? "null" : data.size()));
+        return ResponseEntity
+                .ok()
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(data == null ? java.util.Collections.emptyList() : data);
+    }
+
+
+    /**
+     * Obtiene el sector que tenga más tareas completadas (por todos los usuarios) para el usuario logeado
+     * @param authentication Usa el token para extraer el username
+     * *GET api/tareas/reportes/sector-top-5km
+     */
+    @GetMapping("/reportes/sector-top-5km")
+    public ResponseEntity<?> sectorTop(Authentication authentication) {
+        String username = authentication.getName();
+        Usuario u = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Usuario autenticado no encontrado en DB"));
+
+        SectorTopDTO dto = tareaRepository.sectorConMasTareasCompletadasDentro5km(u.getId());
+        return (dto == null) ? ResponseEntity.noContent().build() : ResponseEntity.ok(dto);
+    }
+
+
+
 
 
 
