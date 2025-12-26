@@ -39,7 +39,6 @@ public class TareaRepository {
             );
 
 
-
     private final RowMapper<SectorTopDTO> sectorTopRowMapper = (rs, rowNum) ->
             new SectorTopDTO(
                     rs.getLong("sector_id"),
@@ -258,7 +257,18 @@ public class TareaRepository {
                         "GROUP BY u.username, s.nombre " +
                         "ORDER BY u.username, s.nombre";
 
+        System.out.println("SQL = " + sql);
 
+        // Debug (sólo imprime labels, no afecta el resultado final)
+        jdbcTemplate.query(sql, rs -> {
+            var md = rs.getMetaData();
+            for (int i = 1; i <= md.getColumnCount(); i++) {
+                System.out.println("COL " + i + ": " + md.getColumnLabel(i));
+            }
+            return null;
+        });
+
+        // Query real
         return jdbcTemplate.query(sql, reporteRowMapper);
     }
 
